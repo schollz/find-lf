@@ -1,15 +1,15 @@
 # find-lf
 
-This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucious Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones (hence `find-lf`).
+This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucius Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
 
 The system is based off a network of Raspberry Pis which sniff the WiFi probe requests from cellphones and sends these parcels to a central server that compiles them sends them to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints.
-
+:)
 # Requirements
 
-- [ ] Raspberry Pi
-- [ ] USB Wifi adapters that support "monitor mode" and [support Raspbian](http://elinux.org/RPi_USB_Wi-Fi_Adapters)
-- [ ] Cheap WiFi adaptor or ethernet connection
-- [ ] Repeat for each additional Raspberry Pi (the more the better)
+- Raspberry Pi
+- USB Wifi adapters that support "monitor mode" and [support Raspbian](http://elinux.org/RPi_USB_Wi-Fi_Adapters)
+- Cheap WiFi adaptor or ethernet connection
+- multiply for each additional Raspberry Pi (the more the better)
 
 # Setup
 
@@ -17,10 +17,12 @@ The system is based off a network of Raspberry Pis which sniff the WiFi probe re
 
 Install Raspbian-lite onto a Pi. Make sure to give it a unique hostname but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
 ```
-wget https://gist.githubusercontent.com/schollz/c2a449485a1767ef109c3d8f16b0b9ec/raw/802ebf68ea149eba1650a5c2383214614f95332a/initialize.sh
+wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh
 sudo ./initialize.sh
 ```
 Alternatively, you can do this using [my script for PiBakery]().
+
+Do this for several Pis.
 
 ## 2. Start Pi cluster
 
