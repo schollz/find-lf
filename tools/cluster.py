@@ -1,0 +1,213 @@
+#!/usr/bin/python3
+
+import sys
+import os
+import json
+import subprocess
+import argparse
+import urllib.parse as urlparse
+from urllib.parse import urlencode
+import logging
+
+import requests
+
+# create logger with 'spam_application'
+logger = logging.getLogger('cluster.py')
+logger.setLevel(logging.DEBUG)
+
+
+def run_command(c):
+    logger.debug("Running command '%s'" % c)
+    p = subprocess.Popen(
+        c,
+        universal_newlines=True,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT)
+    text = p.stdout.read()
+    retcode = p.wait()
+    return text, retcode
+
+
+def getURL(url, params):
+    url_parts = list(urlparse.urlparse(url))
+    query = dict(urlparse.parse_qsl(url_parts[4]))
+    query.update(params)
+    url_parts[4] = urlencode(query)
+    try:
+        getURL = urlparse.urlunparse(url_parts)
+        logger.debug("Requesting " + getURL)
+        r = requests.get(getURL, timeout=3)
+        return r.text
+    except:
+        e = sys.exc_info()[0]
+        logger.error(e)
+        return "Problem requesting"
+
+def isRunning(ip,password):
+    logger.debug("Testing if isRunning %s" % ip)
+    c = """sshpass -p %(password)s ssh pi@%(ip)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip()       
+    r,code = run_command(c % {'password':password,'ip':ip})
+    logger.debug(r)
+    logger.debug(code)
+    if len(r.strip()) == 0:
+        return False
+    else:
+        return True
+
+def kill(ip,password):
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo pkill -9 python3"'
+    logger.debug("Killing %s" % ip)
+    r,code = run_command(c % {'password':password,'ip':ip})
+    logger.debug(r)
+    logger.debug(code)
+    if not isRunning(ip,password):
+        return True
+    else:
+        return False
+
+def start(ip,password,group,lfserver):
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo nohup python3 /home/pi/lfox-sonar/node/scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
+    logger.debug("starting %s" % ip)
+    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    logger.debug(r)
+    logger.debug(code)
+
+def main(command, config):
+    command = command.strip()
+    logger.debug(config)
+    logger.debug("Processing " + command)
+    c = ""
+    if command == "stop":
+        for ip in config['pis']:        
+            if kill(ip,config['password']):
+                print("stopped %s" % ip)
+            else:
+                print("could not kill %s" % ip)
+    elif command == "status":
+        logger.debug("Getting status")
+        for ip in config['pis']:
+            if isRunning(ip,config['password']):
+                print("%s is running" % ip)
+            else:
+                print("%s is not running" % ip)
+    elif command == "start":
+        for ip in config['pis']:
+            if not isRunning(ip,config['password']):
+                start(ip,config['password'],config['group'],config['lfserver'])
+                print("started %s" % ip)
+            else:
+                print("%s is already running" % ip)
+    elif command == "restart":
+        for ip in config['pis']:
+            if not isRunning(ip,config['password']):
+                start(ip,config['password'],config['group'],config['lfserver'])
+                if isRunning(ip,config['password']):
+                    print("started %s" % ip)
+                else:
+                    print("could not start %s" % ip)                    
+            else:
+                kill(ip,config['password'])
+                start(ip,config['password'],config['group'],config['lfserver'])                
+                if isRunning(ip,config['password']):
+                    print("restarted %s" % ip)
+                else:
+                    print("could not restart %s" % ip)                    
+    elif command == "track":
+        response = getURL(config['lfserver'] +
+                          "/switch", {'group': config['group']})
+        print(response)
+    elif command == "learn":
+        if config['user'] == "" or config['location'] == "":
+            print(
+                "Must include name and location! Use ./cluster -u USER -l LOCATION learn")
+            return
+        config['user'] = config['user'].replace(':', '').strip()
+        response = getURL(config['lfserver'] + "/switch",
+                          {'group': config['group'],
+                           'user': config['user'],
+                           'location': config['location']})
+        print(response)
+    else:
+        return "commands are only: start stop status"
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        default="config.json",
+        help="location to configuration file")
+    parser.add_argument(
+        "-l",
+        "--location",
+        type=str,
+        default="",
+        help="location to use, for learning")
+    parser.add_argument(
+        "-u",
+        "--user",
+        type=str,
+        default="",
+        help="user to use, for learning")
+    parser.add_argument(
+        "-g",
+        "--group",
+        type=str,
+        default="",
+        help="group to use")
+    parser.add_argument("command", type=str, default="",
+                        help="start stop status track learn")
+    args = parser.parse_args()
+
+    # create file handler which logs even debug messages
+    fh = logging.FileHandler('cluster.log')
+    ch = logging.StreamHandler()
+    if args.verbose:
+        fh.setLevel(logging.DEBUG)
+        ch.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.ERROR)
+        ch.setLevel(logging.ERROR)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter(
+        '%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
+    config = {}
+    if not os.path.exists(args.config):
+        password = input('Enter Pi password: ')
+        config['password'] = password.strip()
+        pis = []
+        while True:
+            pi = input('Enter Pi address (enter if no more): ')
+            if len(pi) == 0:
+                break
+            pis.append(pi.strip())
+        config['pis'] = pis
+        config['lfserver'] = input(
+            'Enter lf address (default: lf.internalpositioning.com): ')
+        if len(config['lfserver']) == 0:
+            config['lfserver'] = 'https://lf.internalpositioning.com'
+        if 'http' not in config['lfserver']:
+            config['lfserver'] = "http://" + config['lfserver']
+        config['group'] = input('Enter a group: ')
+
+        with open(args.config, 'w') as f:
+            f.write(json.dumps(config, indent=2))
+
+    config = json.load(open(args.config, 'r'))
+    if args.group != "":
+        config['group'] = args.group
+        with open(args.config, 'w') as f:
+            f.write(json.dumps(config, indent=2))
+
+    config['user'] = args.user
+    config['location'] = args.location
+    main(args.command, config)
