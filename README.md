@@ -1,15 +1,15 @@
-# find-lf
+# find-luciusfox
 
-This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucious Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones (hence `find-lf`).
+This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucius Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
 
 The system is based off a network of Raspberry Pis which sniff the WiFi probe requests from cellphones and sends these parcels to a central server that compiles them sends them to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints.
 
 # Requirements
 
-- [ ] Raspberry Pi
-- [ ] USB Wifi adapters that support "monitor mode" and [support Raspbian](http://elinux.org/RPi_USB_Wi-Fi_Adapters)
-- [ ] Cheap WiFi adaptor or ethernet connection
-- [ ] Repeat for each additional Raspberry Pi (the more the better)
+- Raspberry Pi
+- USB Wifi adapters that support "monitor mode" and [support Raspbian](http://elinux.org/RPi_USB_Wi-Fi_Adapters)
+- Cheap WiFi adaptor or ethernet connection
+- multiply for each additional Raspberry Pi (the more the better)
 
 # Setup
 
