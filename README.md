@@ -3,9 +3,7 @@
 [![Join the chat at https://gitter.im/schollz/find](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/schollz/find?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
 [![](https://raw.githubusercontent.com/schollz/find/master/static/splash.gif)](https://www.internalpositioning.com/)
 
-This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucius Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
-
-**Keywords**: indoor GPS, WiFi positioning, indoor mapping, indoor navigation, indoor positioning, batman
+**Keywords**: indoor GPS, WiFi positioning, indoor mapping, indoor positioning, cellphone tracking
 
 This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), which is based on the idea of [Lucius Fox's sonar system *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
 
