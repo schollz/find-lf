@@ -17,7 +17,7 @@ The system is based off a network of Raspberry Pis which sniff the WiFi probe re
 
 Install Raspbian-lite onto a Pi. Make sure to give it a unique hostname but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
 ```
-wget https://gist.githubusercontent.com/schollz/c2a449485a1767ef109c3d8f16b0b9ec/raw/802ebf68ea149eba1650a5c2383214614f95332a/initialize.sh
+wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh
 sudo ./initialize.sh
 ```
 Alternatively, you can do this using [my script for PiBakery]().
