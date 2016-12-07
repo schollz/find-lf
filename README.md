@@ -3,7 +3,7 @@
 This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucius Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
 
 The system is based off a network of Raspberry Pis which sniff the WiFi probe requests from cellphones and sends these parcels to a central server that compiles them sends them to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints.
-:)
+
 # Requirements
 
 - Raspberry Pi
@@ -15,7 +15,7 @@ The system is based off a network of Raspberry Pis which sniff the WiFi probe re
 
 ## 1. Initialize Pis
 
-Install Raspbian-lite onto a Pi. Make sure to give it a unique hostname but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
+[Install Raspbian lite](https://www.raspberrypi.org/downloads/raspbian/) onto a Pi. Make sure to give it a unique hostname but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
 ```
 wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh
 sudo ./initialize.sh
