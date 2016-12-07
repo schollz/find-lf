@@ -8,4 +8,4 @@ The scanning can be started manually using
 sudo python3 /home/pi/find-lf/node/scan.py -g GROUP
 ```
 
-or can be started automatically using the `cluster.py` in `/tools`.
+or can be started automatically using the `cluster.py` in `/tools`. You can modify the scanning time using `--time TIME`.

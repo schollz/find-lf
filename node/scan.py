@@ -78,11 +78,12 @@ def run_command(command):
     return iter(p.stdout.readline, b'')
 
 
-def run_scan():
+def run_scan(timeOfScan):
     logger.debug("Running scan")
     data = []
-    for line in run_command(
-            "/usr/bin/timeout 10s /usr/bin/tshark -I -i wlan1 -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal"):
+    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i wlan1 -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % timeOfScan
+    logger.debug(c)
+    for line in run_command(c):
         data.append(line.decode('utf-8'))
     return "".join(data)
 
@@ -109,6 +110,7 @@ def main():
     # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--group", default="", help="group name")
+    parser.add_argument("-t", "--time", default=10, help="scanning time in seconds (default 10)")
     parser.add_argument(
         "-s",
         "--server",
@@ -143,8 +145,8 @@ def main():
     logger.debug("Using group " + args.group)
     while True:
         try:
-            scan = run_scan()
-            payload = process_scan(scan)
+            scan = run_scan(int(args.time))
+            payload = process_scan(scan,args)
             payload['group'] = args.group
             if len(payload['signals']) > 0:
                 r = requests.post(args.server + "/reversefingerprint", json=payload)
