@@ -73,6 +73,28 @@ def start(ip,password,group,lfserver):
     logger.debug(r)
     logger.debug(code)
 
+def initialize(ip,password):
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "rm initialize.sh"'
+    logger.debug("starting %s" % ip)
+    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    logger.debug(r)
+    logger.debug(code)
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
+    logger.debug("starting %s" % ip)
+    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    logger.debug(r)
+    logger.debug(code)
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "chmod +x initialize.sh"'
+    logger.debug("starting %s" % ip)
+    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    logger.debug(r)
+    logger.debug(code)
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo /home/pi/initialize.sh"'
+    logger.debug("starting %s" % ip)
+    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    logger.debug(r)
+    logger.debug(code)
+
 def main(command, config):
     command = command.strip()
     logger.debug(config)
@@ -84,6 +106,10 @@ def main(command, config):
                 print("stopped %s" % ip)
             else:
                 print("could not kill %s" % ip)
+    elif command == "initialize":
+        for ip in config['pis']:
+            initialize(ip,config['password'])
+            print("initialized %s" % ip)
     elif command == "status":
         logger.debug("Getting status")
         for ip in config['pis']:

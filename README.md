@@ -17,10 +17,9 @@ The system is based off a network of Raspberry Pis which sniff the WiFi probe re
 
 [Install Raspbian lite](https://www.raspberrypi.org/downloads/raspbian/) onto a Pi. Make sure to give it a unique hostname but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
 ```
-wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh
-sudo ./initialize.sh
+sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh)"
 ```
-Alternatively, you can do this using [my script for PiBakery]().
+Alternatively, you can do this using [my script](https://raw.githubusercontent.com/schollz/find-lf/master/node/pibakery.xml) for PiBakery](http://www.pibakery.org/).
 
 Do this for several Pis.
 
@@ -28,11 +27,11 @@ Do this for several Pis.
 
 On another computer, with access to all the Raspberry Pis - denoted 'hub', run 
 ```
-git clone git@bitbucket.org:schollz/lfox-sonar.git
-cd lfox-sonar/tools/
+git clone https://github.com/schollz/find-lf
+cd find-lf/tools/
 python3 cluster.py track
 ```
-to which you'll be asked for the information about your cluster. Choose any `group` that you want, but remember it, as you will need it to login to the FIND server. For the `lf address`, you can use the default (a public server) or set it to your own. See `lfox-sonar/server/README.md` for more information.
+to which you'll be asked for the information about your cluster. Choose any `group` that you want, but remember it, as you will need it to login to the FIND server. For the `lf address`, you can use the default (a public server) or set it to your own. See `find-lf/server/README.md` for more information.
 
 Startup the Pi cluster using `python3.py cluster start`. You can check the status with `python3 cluster.py status`
 
