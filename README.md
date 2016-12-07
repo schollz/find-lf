@@ -22,6 +22,8 @@ sudo ./initialize.sh
 ```
 Alternatively, you can do this using [my script for PiBakery]().
 
+Do this for several Pis.
+
 ## 2. Start Pi cluster
 
 On another computer, with access to all the Raspberry Pis - denoted 'hub', run 
