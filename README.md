@@ -1,7 +1,11 @@
 # find-lf
 
+<<<<<<< HEAD
 [![Join the chat at https://gitter.im/schollz/find](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/schollz/find?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
 [![](https://raw.githubusercontent.com/schollz/find/master/static/splash.gif)](https://www.internalpositioning.com/)
+=======
+This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucius Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
+>>>>>>> 5276738e8289e98ea76d3649d5fbbada87bb0e35
 
 **Keywords**: indoor GPS, WiFi positioning, indoor mapping, indoor navigation, indoor positioning, batman
 
@@ -11,8 +15,15 @@ The system is based off a network of Raspberry Pis which sniff the WiFi probe re
 
 # Requirements
 
+<<<<<<< HEAD
 - Several Raspberry Pis, where each Raspberry pi has [a USB Wifi adapter that supports "monitor mode"](http://elinux.org/RPi_USB_Wi-Fi_Adapters), and it additionally has a second internet connection via ethernet or another adapter
 - A computer with Python3 and [sshpass](https://gist.github.com/arunoda/7790979#file-gistfile1-md) installed
+=======
+- Raspberry Pi
+- USB Wifi adapters that support "monitor mode" and [support Raspbian](http://elinux.org/RPi_USB_Wi-Fi_Adapters)
+- Cheap WiFi adaptor or ethernet connection
+- multiply for each additional Raspberry Pi (the more the better)
+>>>>>>> 5276738e8289e98ea76d3649d5fbbada87bb0e35
 
 # Setup
 
@@ -24,7 +35,11 @@ sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/schollz/find-lf/maste
 ```
 Alternatively, you can do this using [my script](https://raw.githubusercontent.com/schollz/find-lf/master/node/pibakery.xml) for PiBakery](http://www.pibakery.org/).
 
+<<<<<<< HEAD
 Do this for several Pis and then plug in the WiFi adapter that has "monitor" mode.
+=======
+Do this for several Pis.
+>>>>>>> 5276738e8289e98ea76d3649d5fbbada87bb0e35
 
 ## 2. Start Pi cluster
 
