@@ -4,7 +4,6 @@
 [![](https://raw.githubusercontent.com/schollz/find/master/static/splash.gif)](https://www.internalpositioning.com/)
 
 This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), that is somewhat based off [Lucius Fox's technology in *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
->>>>>>> 5276738e8289e98ea76d3649d5fbbada87bb0e35
 
 **Keywords**: indoor GPS, WiFi positioning, indoor mapping, indoor navigation, indoor positioning, batman
 
