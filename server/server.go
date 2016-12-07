@@ -57,13 +57,17 @@ var switches = struct {
 	m map[string]string
 }{m: make(map[string]string)}
 
-var ServerAddress, Group string
+var ServerAddress, Group, Port string
 var MinimumNumberOfRouters int
+var CollectionTime int
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 
+	flag.StringVar(&Port, "port", "8072", "port to run this server on (default: 8072)")
 	flag.StringVar(&ServerAddress, "server", "https://ml.internalpositioning.com", "address to FIND server")
 	flag.IntVar(&MinimumNumberOfRouters, "min", 0, "minimum number of routers before sending fingerprint")
+	flag.IntVar(&CollectionTime, "time", 10, "collection time to average fingerprints (in seconds)")
 	flag.Parse()
 
 	router := gin.Default()
@@ -82,18 +86,19 @@ func main() {
 	switches.Unlock()
 
 	// Route handling
-	switchUse := `/switch - for learning and tracking
+	switchUse := `find-lf server
 
-USE:
+Routes available:
 
-if you want to track, use GET /switch?group=GROUPNAME
+GET /switch - for learning and tracking
 
-if you want to learn, use GET /switch?group=group&user=mac1,mac2,mac3&location=location
-where group is the group name
-where mac1, ... are the macs of the devices you are using for learning
-where location is the location you are trying to learn
+- if you want to track, use GET /switch?group=GROUPNAME
+- if you want to learn, use GET /switch?group=group&user=mac1,mac2,mac3&location=location
+  where group is the group name
+  where mac1,mac2,... are the macs of the devices you are using for learning
+  where location is the location you are trying to learn
 `
-	router.POST("/post", func(c *gin.Context) {
+	router.POST("/reversefingerprint", func(c *gin.Context) {
 		var json ReverseFingerprint
 		err := c.BindJSON(&json)
 		if err == nil {
@@ -103,11 +108,8 @@ where location is the location you are trying to learn
 		}
 		c.String(http.StatusOK, "recieved")
 	})
-	router.GET("/config/:group/initialize.sh", func(c *gin.Context) {
-		group := c.Param("group")
-		b, _ := ioutil.ReadFile("../node/initialize.sh")
-		data := strings.Replace(string(b), "GROUPNAME", group, -1)
-		c.String(http.StatusOK, data)
+	router.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, switchUse)
 	})
 	router.GET("/switch", func(c *gin.Context) {
 		group := c.DefaultQuery("group", "")
@@ -142,7 +144,8 @@ where location is the location you are trying to learn
 		c.String(http.StatusOK, message)
 	})
 
-	router.Run(":8072")
+	fmt.Println("Running on 127.0.0.1:" + Port)
+	router.Run(":" + Port)
 }
 
 func process(json ReverseFingerprint) {
@@ -165,7 +168,7 @@ func process(json ReverseFingerprint) {
 
 func parseFingerprints() {
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(time.Duration(CollectionTime) * time.Second)
 		fingerprints.Lock()
 		go sendFingerprints(fingerprints.m)
 		// clear fingerprints

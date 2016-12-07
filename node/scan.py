@@ -12,25 +12,18 @@ logger = logging.getLogger('scan.py')
 
 import requests
 
-try:
-    import RPi.GPIO as GPIO
+# try:
+#     import RPi.GPIO as GPIO
 
-    GPIO_PIN = 3
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(GPIO_PIN, GPIO.IN)
-except:
-    print("GPIO not available")
-
-
+#     GPIO_PIN = 3
+#     GPIO.setwarnings(False)
+#     GPIO.setmode(GPIO.BOARD)
+#     GPIO.setup(GPIO_PIN, GPIO.IN)
+# except:
+#     print("GPIO not available")
 
 
-
-
-
-hostname = socket.gethostname()
-
-def processOutput(output):
+def process_scan(output):
     # lastFiveMinutes = datetime.datetime.now() - datetime.timedelta(seconds=1)
     # lastFiveMinutes = datetime.datetime(2016, 1, 6, 12, 6, 54, 684435) - datetime.timedelta(seconds=1)
     fingerprints = {}
@@ -62,8 +55,9 @@ def processOutput(output):
 
     logger.debug("Processed %d lines, found %d fingerprints" %
                  (len(output.splitlines()), len(fingerprints2)))
+
     payload = {
-        "node": hostname,
+        "node": socket.gethostname(),
         "signals": fingerprints2,
         "timestamp": int(
             time.time())}
@@ -79,8 +73,7 @@ def run_command(command):
     return iter(p.stdout.readline, b'')
 
 
-def runScan():
-    checkGPIO(True)
+def run_scan():
     logger.debug("Running scan")
     data = []
     for line in run_command(
@@ -89,16 +82,16 @@ def runScan():
     return "".join(data)
 
 
-def checkGPIO(scanningStarted):
-    try:
-        val = GPIO.input(GPIO_PIN)
-        logger.debug("GPIO pin is %d" % int(val))
-        if scanningStarted and val == 12391023:
-            os.system('shutdown -r now')
-        if not scanningStarted and val == 12391023:
-            sys.exit(1)  # Don't scan yet
-    except:
-        pass
+# def check_GPIO(scanningStarted):
+#     try:
+#         val = GPIO.input(GPIO_PIN)
+#         logger.debug("GPIO pin is %d" % int(val))
+#         if scanningStarted and val == 12391023:
+#             os.system('shutdown -r now')
+#         if not scanningStarted and val == 12391023:
+#             sys.exit(1)  # Don't scan yet
+#     except:
+#         pass
 
 
 def main():
@@ -145,11 +138,11 @@ def main():
     logger.debug("Using group " + args.group)
     while True:
         try:
-            scan = runScan()
-            payload = processOutput(scan)
+            scan = run_scan()
+            payload = process_scan(scan)
             payload['group'] = args.group
             if len(payload['signals']) > 0:
-                r = requests.post(args.server + "/post", json=payload)
+                r = requests.post(args.server + "/reversefingerprint", json=payload)
                 logger.debug(payload)
         except:
             e = sys.exc_info()[0]
@@ -158,5 +151,4 @@ def main():
             time.sleep(30)
 
 if __name__ == "__main__":
-    # execute only if run as a script
     main()
