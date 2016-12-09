@@ -23,31 +23,33 @@
 </head>
 <body>
 
-
-  <div id="container">
-    <div class="col-md-4"></div>
-   <div class="col-md-4">
-          <div class="form-group">
-            <label for="group" class="control-label">Group</label>
-            <input type="text" class="form-control" id="group" placeholder="" required>
-          </div>
-          <div class="form-group">
-            <label for="loc" class="control-label">Location (for learning)</label>
-            <input type="text" class="form-control" id="loc" placeholder="">
-          </div>
-          <div class="form-group">
-            <label for="mac" class="control-label">Phone mac addresses (for learning)</label>
-            <input type="text" class="form-control" id="mac" placeholder="">
-          </div>
-          <div class="form-group">
-            <button type="button" id="track" class="btn btn-primary">Track</button>
-            <button type="button" id="learn" class="btn btn-primary">Learn</button>
-            <button type="button" id="status" class="btn btn-primary">Status</button>
-          </div>
-   </div>
-    <div class="col-md-4"></div>
-
+<div id="container">
+  <div class="col-md-4"></div>
+  <div class="col-md-4">
+    <h2>Lucius Fox Internal Positioning <small><a href="https://github.com/schollz/find-lf">Instructions</a></small></h2>
+    <div class="form-group">
+      <label for="group" class="control-label">Group:</label>
+      <input type="text" class="form-control" id="group" placeholder="" required autofocus> </div>
+    <div class="form-group">
+      <label for="loc" class="control-label">Location (for learning):</label>
+      <input type="text" class="form-control" id="loc" placeholder=""> </div>
+    <div class="form-group">
+      <label for="mac" class="control-label">Phone mac addresses (for learning):</label>
+      <input type="text" class="form-control" id="mac" placeholder=""> </div>
+    <div class="form-group">
+      <div class="col-md-4">
+        <button type="button" id="track" class="btn btn-success btn-block">Track</button>
+      </div>
+      <div class="col-md-4">
+        <button type="button" id="learn" class="btn btn-primary btn-block">Learn</button>
+      </div>
+      <div class="col-md-4">
+        <button type="button" id="status" class="btn btn-danger btn-block">Status</button>
+      </div>
+    </div>
   </div>
+  <div class="col-md-4"></div>
+</div>
 
 <script>
 $(document).on('click', "button", function() {
@@ -60,47 +62,45 @@ $(document).on('click', "button", function() {
     mac = document.getElementById('mac').value;
     console.log(mac);
     if (dat == "learn" && loc == "") {
-      toastr.warning('Enter location for learning');
-      return false;
+        toastr.warning('Enter location for learning');
+        return false;
     }
     if (dat == "learn" && mac == "") {
-      toastr.warning('Enter mac for learning');
-      return false;
+        toastr.warning('Enter mac for learning');
+        return false;
     }
     if (group == "") {
-      toastr.warning("Must enter group name");
-      return false;
+        toastr.warning("Must enter group name");
+        return false;
     }
     data = {};
     data.group = group;
     if (mac != "" && dat != "track" && dat != "status") {
-      data.user = mac
+        data.user = mac
     }
-    if (loc != "" && dat != "track"  && dat != "status") {
-      data.loc = loc
+    if (loc != "" && dat != "track" && dat != "status") {
+        data.loc = loc
     }
     url = "/status";
     if (dat == "track" || dat == "learn") {
-      url = "/switch";
+        url = "/switch";
     }
-
-  	$.ajax({
-  	    url: url,
-  	    data: data,
-  	    type: "GET",
-  	    success: function(response) {
-          if (url == "/status") {
-            toastr.info(response);
-          } else {
-            toastr.success(response);
-          }
-  	    },
-  	    error: function(xhr, status, error) {
-          toastr.error(xhr.responseText);
-  	    }
-  	});
+    $.ajax({
+        url: url,
+        data: data,
+        type: "GET",
+        success: function(response) {
+            if (url == "/status") {
+                toastr.info(response);
+            } else {
+                toastr.success(response);
+            }
+        },
+        error: function(xhr, status, error) {
+            toastr.error(xhr.responseText);
+        }
+    });
 });
-
 
 </script>
 </body>
