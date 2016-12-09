@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +17,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // TESTING
@@ -102,6 +104,22 @@ GET /switch - for learning and tracking
   where mac1,mac2,... are the macs of the devices you are using for learning
   where location is the location you are trying to learn
 `
+	router.Static("/static", "./static")
+	router.LoadHTMLGlob("templates/*")
+	router.GET("/", func(c *gin.Context) {
+		response, err := http.Get("https://github.com/schollz/find-lf")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer response.Body.Close()
+		body, err := ioutil.ReadAll(response.Body)
+		html := string(body)
+		out := StrExtract(html, `<div id="readme"`, "</article>", 1)
+		out = `<div id="readme"` + out + "</article></div>"
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"body": template.HTML(out),
+		})
+	})
 	router.POST("/reversefingerprint", func(c *gin.Context) {
 		var json ReverseFingerprint
 		err := c.BindJSON(&json)
@@ -111,9 +129,6 @@ GET /switch - for learning and tracking
 			log.Println(err)
 		}
 		c.String(http.StatusOK, "recieved")
-	})
-	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, switchUse)
 	})
 	router.GET("/switch", func(c *gin.Context) {
 		group := c.DefaultQuery("group", "")
@@ -242,4 +257,22 @@ func sendFingerprints(m map[string]map[string]map[string]int) {
 			defer resp.Body.Close()
 		}
 	}
+}
+
+func StrExtract(sExper, sAdelim, sCdelim string, nOccur int) string {
+
+	aExper := strings.Split(sExper, sAdelim)
+
+	if len(aExper) <= nOccur {
+		return ""
+	}
+
+	sMember := aExper[nOccur]
+	aExper = strings.Split(sMember, sCdelim)
+
+	if len(aExper) == 1 {
+		return ""
+	}
+
+	return aExper[0]
 }
