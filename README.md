@@ -19,7 +19,7 @@ The system is based off a network of Raspberry Pis which sniff the WiFi probe re
 ```
 sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh)"
 ```
-Alternatively, you can do this using [my script](https://raw.githubusercontent.com/schollz/find-lf/master/node/pibakery.xml) for PiBakery](http://www.pibakery.org/).
+Alternatively, you can do this using [my script](https://raw.githubusercontent.com/schollz/find-lf/master/node/pibakery.xml) for [PiBakery](http://www.pibakery.org/).
 
 Do this for several Pis and then plug in the WiFi adapter that has "monitor" mode.
 
@@ -37,7 +37,7 @@ Startup the Pi cluster using `python3.py cluster start`. You can check the statu
 
 ## 3. Classify locations using Pi cluster
 
-After the cluster is up in running, you need to do learning. Take a smart phone and identify its mac address, something like `AA:BB:CC:DD:EE:FF`. Take your phone to a location. Then, on a computer, use `python3 cluster.py -u AA:BB:CC:DD:EE:FF -l location` where `location` is where your phone is. When you are done, use `python3 cluster.py track`. *This is important!* This turns off learning, and otherwise you'll be mixing signals for locations.
+After the cluster is up in running, you need to do learning. Take a smart phone and identify its mac address, something like `AA:BB:CC:DD:EE:FF`. Take your phone to a location. Then, on a computer, use `python3 cluster.py -u AA:BB:CC:DD:EE:FF -l location` where `location` is where your phone is. When you are done, use `python3 cluster.py track`. *This is important!* This turns off learning, and otherwise you'll be mixing signals for locations. Alternatively, you can activate learning/tracking directly from [the find-lf website](https://lf.internalpositioning.com).
 
 Repeat this step for as many locations as you want.
 
