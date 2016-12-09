@@ -10,15 +10,98 @@
   <meta name="author" content="Zack">
 
   <title>
-    find-lf documentation
+    find-lf
   </title>
 
-  <link rel="stylesheet" href="/static/github1.css">
-  <link rel="stylesheet" href="/static/github2.css">
+  <script src="/static/jquery.min.js"></script>
+  <script src="/static/toastr.min.js"></script>
+  <script src="/static/glimpse.js"></script>
+  <script src="/static/glimpse.toastr.js"></script>
+  <script src="/static/bootstrap.min.js"></script>
+  <link href="/static/toastr.min.css" rel="stylesheet" type="text/css" />
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
-{{ .body }}
 
+  <div id="container">
+    <div class="col-md-4"></div>
+   <div class="col-md-4">
+          <div class="form-group">
+            <label for="group" class="control-label">Group</label>
+            <input type="text" class="form-control" id="group" placeholder="" required>
+          </div>
+          <div class="form-group">
+            <label for="loc" class="control-label">Location (for learning)</label>
+            <input type="text" class="form-control" id="loc" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="mac" class="control-label">Phone mac addresses (for learning)</label>
+            <input type="text" class="form-control" id="mac" placeholder="">
+          </div>
+          <div class="form-group">
+            <button type="button" id="track" class="btn btn-primary">Track</button>
+            <button type="button" id="learn" class="btn btn-primary">Learn</button>
+            <button type="button" id="status" class="btn btn-primary">Status</button>
+          </div>
+   </div>
+    <div class="col-md-4"></div>
+
+  </div>
+
+<script>
+$(document).on('click', "button", function() {
+    dat = $(this).attr("id");
+    console.log(dat);
+    group = document.getElementById('group').value;
+    console.log(group);
+    loc = document.getElementById('loc').value;
+    console.log(loc);
+    mac = document.getElementById('mac').value;
+    console.log(mac);
+    if (dat == "learn" && loc == "") {
+      toastr.warning('Enter location for learning');
+      return false;
+    }
+    if (dat == "learn" && mac == "") {
+      toastr.warning('Enter mac for learning');
+      return false;
+    }
+    if (group == "") {
+      toastr.warning("Must enter group name");
+      return false;
+    }
+    data = {};
+    data.group = group;
+    if (mac != "" && dat != "track" && dat != "status") {
+      data.user = mac
+    }
+    if (loc != "" && dat != "track"  && dat != "status") {
+      data.loc = loc
+    }
+    url = "/status";
+    if (dat == "track" || dat == "learn") {
+      url = "/switch";
+    }
+
+  	$.ajax({
+  	    url: url,
+  	    data: data,
+  	    type: "GET",
+  	    success: function(response) {
+          if (url == "/status") {
+            toastr.info(response);
+          } else {
+            toastr.success(response);
+          }
+  	    },
+  	    error: function(xhr, status, error) {
+          toastr.error(xhr.responseText);
+  	    }
+  	});
+});
+
+
+</script>
 </body>
 </html>

@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -107,18 +106,16 @@ GET /switch - for learning and tracking
 	router.Static("/static", "./static")
 	router.LoadHTMLGlob("templates/*")
 	router.GET("/", func(c *gin.Context) {
-		response, err := http.Get("https://github.com/schollz/find-lf")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer response.Body.Close()
-		body, err := ioutil.ReadAll(response.Body)
-		html := string(body)
-		out := StrExtract(html, `<div id="readme"`, "</article>", 1)
-		out = `<div id="readme"` + out + "</article></div>"
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"body": template.HTML(out),
-		})
+		// response, err := http.Get("https://github.com/schollz/find-lf")
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// defer response.Body.Close()
+		// body, err := ioutil.ReadAll(response.Body)
+		// html := string(body)
+		// out := StrExtract(html, `<div id="readme"`, "</article>", 1)
+		// out = `<div id="readme"` + out + "</article></div>"
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{})
 	})
 	router.POST("/reversefingerprint", func(c *gin.Context) {
 		var json ReverseFingerprint
@@ -130,10 +127,30 @@ GET /switch - for learning and tracking
 		}
 		c.String(http.StatusOK, "recieved")
 	})
+	router.GET("/status", func(c *gin.Context) {
+		group := c.DefaultQuery("group", "")
+		if len(group) == 0 {
+			c.String(http.StatusBadRequest, "must include group name!\n\n"+switchUse)
+			return
+		}
+
+		switches.Lock()
+		dat, ok := switches.m[group]
+		switches.Unlock()
+		if ok && dat != "///" {
+			user := strings.ToLower(strings.TrimSpace(strings.Split(dat, "///")[0]))
+			location := strings.ToLower(strings.TrimSpace(strings.Split(dat, "///")[1]))
+			c.String(http.StatusOK, group+" set to learning at '"+location+"' for user '"+user+"'")
+		} else if dat == "///" {
+			c.String(http.StatusOK, group+" set to tracking")
+		} else {
+			c.String(401, "group not found")
+		}
+	})
 	router.GET("/switch", func(c *gin.Context) {
 		group := c.DefaultQuery("group", "")
 		user := strings.ToLower(strings.Replace(c.DefaultQuery("user", ""), ":", "", -1))
-		location := c.DefaultQuery("location", "")
+		location := c.DefaultQuery("loc", "")
 		if len(group) == 0 {
 			c.String(http.StatusBadRequest, "must include group name!\n\n"+switchUse)
 			return
