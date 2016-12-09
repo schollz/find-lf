@@ -55,7 +55,7 @@
 $(document).on('click', "button", function() {
     dat = $(this).attr("id");
     console.log(dat);
-    group = document.getElementById('group').value;
+    group = document.getElementById('group').value.toLowerCase();
     console.log(group);
     loc = document.getElementById('loc').value;
     console.log(loc);
