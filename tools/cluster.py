@@ -71,7 +71,7 @@ def kill(ip,password):
         return False
 
 def start(ip,password,group,lfserver):
-    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo nohup python3 /home/pi/find-lf/node/scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
     logger.debug("starting %s" % ip)
     r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
     logger.debug(r)
