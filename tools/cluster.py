@@ -162,6 +162,27 @@ def main(command, config):
         return "commands are only: start stop status"
 
 if __name__ == '__main__':
+    print("""
+python3 cluster.py COMMAND
+
+    status:
+        get the current status of all Pis in the cluster
+    stop: 
+        stops scanning in all Pis in the cluster
+    start: 
+        starts scanning in all Pis in the cluster
+    restart: 
+        stops and starts all Pis in the cluster
+    initialize: 
+        download the latest version of scan.py and update packages
+    track -g GROUP: 
+        communicate with find-lf server to tell it to track 
+        for group GROUP
+    learn -u USER -g GROUP -l LOCATION: 
+        communicate with find-lf server to 
+        tell it to perform learning in the specified location for user/group.
+
+""")
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument(
