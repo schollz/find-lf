@@ -263,6 +263,9 @@ python3 cluster.py COMMAND
             if len(pi) == 0:
                 break
             pis.append(pi.strip())
+        if len(pis) == 0:
+            print("Must include at least one computer!")
+            sys.exit(-1)
         config['pis'] = pis
         config['lfserver'] = input(
             'Enter lf address (default: lf.internalpositioning.com): ')

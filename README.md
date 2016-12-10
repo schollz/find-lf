@@ -27,8 +27,7 @@ Do this for several Pis and then plug in the WiFi adapter that has "monitor" mod
 
 On another computer, with access to all the Raspberry Pis - run 
 ```
-git clone https://github.com/schollz/find-lf
-cd find-lf/tools/
+wget https://raw.githubusercontent.com/schollz/find-lf/master/tools/cluster.py
 python3 cluster.py track
 ```
 to which you'll be asked for the information about your cluster. Choose any `group` that you want, but remember it, as you will need it to login to the FIND server. For the `lf address`, you can use the default (a public server) or set it to your own. See `find-lf/server/README.md` for more information.
