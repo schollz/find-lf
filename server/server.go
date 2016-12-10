@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Zack Scholl. All rights reserved.
+// Copyright 2015-2017 Zack Scholl. All rights reserved.
 // Use of this source code is governed by a AGPL
 // license that can be found in the LICENSE file.
 
@@ -106,15 +106,6 @@ GET /switch - for learning and tracking
 	router.Static("/static", "./static")
 	router.LoadHTMLGlob("templates/*")
 	router.GET("/", func(c *gin.Context) {
-		// response, err := http.Get("https://github.com/schollz/find-lf")
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		// defer response.Body.Close()
-		// body, err := ioutil.ReadAll(response.Body)
-		// html := string(body)
-		// out := StrExtract(html, `<div id="readme"`, "</article>", 1)
-		// out = `<div id="readme"` + out + "</article></div>"
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{})
 	})
 	router.POST("/reversefingerprint", func(c *gin.Context) {
