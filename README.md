@@ -46,3 +46,7 @@ Repeat this step for as many locations as you want.
 Now you are all set to track! On the hub computer, run `python3 cluster.py track` and goto see your tracking at https://ml.internalpositioning.com.
 
 
+# License
+Copyright 2015-2017 Zack Scholl. All rights reserved.
+Use of this source code is governed by a AGPL
+license that can be found in the LICENSE file.

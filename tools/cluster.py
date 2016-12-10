@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Copyright 2015-2016 Zack Scholl. All rights reserved.
+# Copyright 2015-2017 Zack Scholl. All rights reserved.
 # Use of this source code is governed by a AGPL
 # license that can be found in the LICENSE file.
 
