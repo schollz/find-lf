@@ -128,9 +128,9 @@ def main(command, config):
         logger.debug("Getting status")
         for ip in config['pis']:
             if isRunning(ip, config['password']):
-                print("%s is running" % ip)
+                print("%s is scanning" % ip)
             else:
-                print("%s is not running" % ip)
+                print("%s is not scanning" % ip)
     elif command == "start":
         for ip in config['pis']:
             if not isRunning(ip, config['password']):
@@ -141,7 +141,7 @@ def main(command, config):
                     config['lfserver'])
                 print("started %s" % ip)
             else:
-                print("%s is already running" % ip)
+                print("%s is already scanning" % ip)
     elif command == "restart":
         for ip in config['pis']:
             if not isRunning(ip, config['password']):

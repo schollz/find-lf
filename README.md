@@ -1,10 +1,10 @@
 # find-lf
 
-[![Join the chat at https://gitter.im/schollz/find](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/schollz/find?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), which is based on the idea of [Lucius Fox's sonar system *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
 
-The system is based off a network of Raspberry Pis which sniff the WiFi probe requests from cellphones and sends these parcels to a central server that compiles them sends them to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints. This system does *not* use time-of-flight triangulation - this system requires a user to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below).
+The system is based off a network of Raspberry Pis which sniff the WiFi probe requests from cellphones and sends these parcels to a central server which compiles and forwards the fingerprint to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints. 
+
+This system does not require a phone to be logged into a particular WiFi - it will track *any phone with WiFi enabled*! This system does *not* use time-of-flight triangulation - this system requires a user to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below). 
 
 # Requirements
 
@@ -37,16 +37,21 @@ Startup the Pi cluster using `python3.py cluster start`. You can check the statu
 
 ## 3. Classify locations using Pi cluster
 
-After the cluster is up in running, you need to do learning. Take a smart phone and identify its mac address, something like `AA:BB:CC:DD:EE:FF`. Take your phone to a location. Then, on a computer, use `python3 cluster.py -u AA:BB:CC:DD:EE:FF -l location` where `location` is where your phone is. When you are done, use `python3 cluster.py track`. *This is important!* This turns off learning, and otherwise you'll be mixing signals for locations. Alternatively, you can activate learning/tracking directly from [the find-lf website](https://lf.internalpositioning.com).
+After the cluster is up in running, you need to do learning. Take a smart phone and identify its mac address, something like `AA:BB:CC:DD:EE:FF`. Take your phone to a location. Then activate the find-lf server to do learning either by switching on [the find-lf website](https://lf.internalpositioning.com) or running `python3 cluster.py -u AA:BB:CC:DD:EE:FF -l location`.
 
-Repeat this step for as many locations as you want.
+*This is important!* Before moving to a new location, make sure to turn off learning by switching to tracking. Activate this on the find-lf server using the [the find-lf website](https://lf.internalpositioning.com) or use `python3 cluster.py track`. 
+
+Repeat these steps for as many locations as you want.
 
 ## 4. Track all the cellphones!
 
-Now you are all set to track! On the hub computer, run `python3 cluster.py track` and goto see your tracking at https://ml.internalpositioning.com.
+Now just go to https://ml.internalpositioning.com and login using your group name to see tracking of all the phones!
+
+You can also track a single phone using https://ml.internalpositioning.com/GROUP/dashboard?user=AA:BB:CC:DD:EE:FF.
 
 
 # License
+
 Copyright 2015-2017 Zack Scholl. All rights reserved.
 Use of this source code is governed by a AGPL
 license that can be found in the LICENSE file.
