@@ -48,10 +48,11 @@ def getURL(url, params):
         logger.error(e)
         return "Problem requesting"
 
-def isRunning(ip,password):
+
+def isRunning(ip, password):
     logger.debug("Testing if isRunning %s" % ip)
-    c = """sshpass -p %(password)s ssh pi@%(ip)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip()       
-    r,code = run_command(c % {'password':password,'ip':ip})
+    c = """sshpass -p %(password)s ssh pi@%(ip)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip()
+    r, code = run_command(c % {'password': password, 'ip': ip})
     logger.debug(r)
     logger.debug(code)
     if len(r.strip()) == 0:
@@ -59,45 +60,54 @@ def isRunning(ip,password):
     else:
         return True
 
-def kill(ip,password):
+
+def kill(ip, password):
     c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo pkill -9 python3"'
     logger.debug("Killing %s" % ip)
-    r,code = run_command(c % {'password':password,'ip':ip})
+    r, code = run_command(c % {'password': password, 'ip': ip})
     logger.debug(r)
     logger.debug(code)
-    if not isRunning(ip,password):
+    if not isRunning(ip, password):
         return True
     else:
         return False
 
-def start(ip,password,group,lfserver):
+
+def start(ip, password, group, lfserver):
     c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
     logger.debug("starting %s" % ip)
-    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    r, code = run_command(
+        c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
     logger.debug(r)
     logger.debug(code)
 
-def initialize(ip,password):
+
+def initialize(ip, password):
     c = 'sshpass -p %(password)s ssh pi@%(ip)s "rm initialize.sh"'
     logger.debug("starting %s" % ip)
-    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    r, code = run_command(
+        c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
     logger.debug(r)
     logger.debug(code)
     c = 'sshpass -p %(password)s ssh pi@%(ip)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
     logger.debug("starting %s" % ip)
-    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    r, code = run_command(
+        c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
     logger.debug(r)
     logger.debug(code)
     c = 'sshpass -p %(password)s ssh pi@%(ip)s "chmod +x initialize.sh"'
     logger.debug("starting %s" % ip)
-    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    r, code = run_command(
+        c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
     logger.debug(r)
     logger.debug(code)
     c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo initialize.sh"'
     logger.debug("starting %s" % ip)
-    r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
+    r, code = run_command(
+        c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
     logger.debug(r)
     logger.debug(code)
+
 
 def main(command, config):
     command = command.strip()
@@ -105,44 +115,56 @@ def main(command, config):
     logger.debug("Processing " + command)
     c = ""
     if command == "stop":
-        for ip in config['pis']:        
-            if kill(ip,config['password']):
+        for ip in config['pis']:
+            if kill(ip, config['password']):
                 print("stopped %s" % ip)
             else:
                 print("could not kill %s" % ip)
     elif command == "initialize":
         for ip in config['pis']:
-            initialize(ip,config['password'])
+            initialize(ip, config['password'])
             print("initialized %s" % ip)
     elif command == "status":
         logger.debug("Getting status")
         for ip in config['pis']:
-            if isRunning(ip,config['password']):
+            if isRunning(ip, config['password']):
                 print("%s is running" % ip)
             else:
                 print("%s is not running" % ip)
     elif command == "start":
         for ip in config['pis']:
-            if not isRunning(ip,config['password']):
-                start(ip,config['password'],config['group'],config['lfserver'])
+            if not isRunning(ip, config['password']):
+                start(
+                    ip,
+                    config['password'],
+                    config['group'],
+                    config['lfserver'])
                 print("started %s" % ip)
             else:
                 print("%s is already running" % ip)
     elif command == "restart":
         for ip in config['pis']:
-            if not isRunning(ip,config['password']):
-                start(ip,config['password'],config['group'],config['lfserver'])
-                if isRunning(ip,config['password']):
+            if not isRunning(ip, config['password']):
+                start(
+                    ip,
+                    config['password'],
+                    config['group'],
+                    config['lfserver'])
+                if isRunning(ip, config['password']):
                     print("started %s" % ip)
                 else:
-                    print("could not start %s" % ip)                    
+                    print("could not start %s" % ip)
             else:
-                kill(ip,config['password'])
-                start(ip,config['password'],config['group'],config['lfserver'])                
-                if isRunning(ip,config['password']):
+                kill(ip, config['password'])
+                start(
+                    ip,
+                    config['password'],
+                    config['group'],
+                    config['lfserver'])
+                if isRunning(ip, config['password']):
                     print("restarted %s" % ip)
                 else:
-                    print("could not restart %s" % ip)                    
+                    print("could not restart %s" % ip)
     elif command == "track":
         response = getURL(config['lfserver'] +
                           "/switch", {'group': config['group']})
@@ -167,19 +189,19 @@ python3 cluster.py COMMAND
 
     status:
         get the current status of all Pis in the cluster
-    stop: 
+    stop:
         stops scanning in all Pis in the cluster
-    start: 
+    start:
         starts scanning in all Pis in the cluster
-    restart: 
+    restart:
         stops and starts all Pis in the cluster
-    initialize: 
+    initialize:
         download the latest version of scan.py and update packages
-    track -g GROUP: 
-        communicate with find-lf server to tell it to track 
+    track -g GROUP:
+        communicate with find-lf server to tell it to track
         for group GROUP
-    learn -u USER -g GROUP -l LOCATION: 
-        communicate with find-lf server to 
+    learn -u USER -g GROUP -l LOCATION:
+        communicate with find-lf server to
         tell it to perform learning in the specified location for user/group.
 
 """)

@@ -102,7 +102,8 @@ def run_scan(timeOfScan):
 
 def main():
     # Check if SUDO
-    # from http://serverfault.com/questions/16767/check-admin-rights-inside-python-script
+    # from
+    # http://serverfault.com/questions/16767/check-admin-rights-inside-python-script
     if os.getuid() != 0:
         print("you must run sudo!")
         return
@@ -110,7 +111,11 @@ def main():
     # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--group", default="", help="group name")
-    parser.add_argument("-t", "--time", default=10, help="scanning time in seconds (default 10)")
+    parser.add_argument(
+        "-t",
+        "--time",
+        default=10,
+        help="scanning time in seconds (default 10)")
     parser.add_argument(
         "-s",
         "--server",
@@ -131,12 +136,12 @@ def main():
     fh.setLevel(loggingLevel)
     ch = logging.StreamHandler()
     ch.setLevel(loggingLevel)
-    formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
     logger.addHandler(fh)
     logger.addHandler(ch)
-
 
     # Startup scanning
     print("Using server " + args.server)
@@ -146,10 +151,13 @@ def main():
     while True:
         try:
             scan = run_scan(int(args.time))
-            payload = process_scan(scan,args)
+            payload = process_scan(scan, args)
             payload['group'] = args.group
             if len(payload['signals']) > 0:
-                r = requests.post(args.server + "/reversefingerprint", json=payload)
+                r = requests.post(
+                    args.server +
+                    "/reversefingerprint",
+                    json=payload)
                 logger.debug(payload)
         except:
             e = sys.exc_info()[0]
