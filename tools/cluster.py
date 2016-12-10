@@ -93,7 +93,7 @@ def initialize(ip,password):
     r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
     logger.debug(r)
     logger.debug(code)
-    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo /home/pi/initialize.sh"'
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo initialize.sh"'
     logger.debug("starting %s" % ip)
     r,code = run_command(c % {'password':password,'ip':ip,'group':group,'lfserver':lfserver})
     logger.debug(r)
