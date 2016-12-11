@@ -28,7 +28,7 @@ import requests
 #     print("GPIO not available")
 
 
-def process_scan(output):
+def process_scan(output,args):
     # lastFiveMinutes = datetime.datetime.now() - datetime.timedelta(seconds=1)
     # lastFiveMinutes = datetime.datetime(2016, 1, 6, 12, 6, 54, 684435) - datetime.timedelta(seconds=1)
     fingerprints = {}
