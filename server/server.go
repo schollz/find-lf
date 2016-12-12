@@ -188,6 +188,9 @@ func process(json ReverseFingerprint) {
 		if _, ok := fingerprints.m[json.Group][user]; !ok {
 			fingerprints.m[json.Group][user] = make(map[string]int)
 		}
+		if signal.Rssi > 0 {
+			signal.Rssi = signal.Rssi * -1
+		}
 		fingerprints.m[json.Group][user][mac] = signal.Rssi
 	}
 	fingerprints.Unlock()
