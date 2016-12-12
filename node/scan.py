@@ -34,6 +34,8 @@ def process_scan(output,args):
     fingerprints = {}
     for line in output.splitlines():
         try:
+            # if 'Tp-LinkT' not in line:
+            #     continue
             timestamp = datetime.datetime.strptime(
                 " ".join(
                     line.split()[
@@ -92,7 +94,7 @@ def run_scan(timeOfScan):
         wlan = "wlan1"
 
     data = []
-    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % (timeOfScan,wlan)
+    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -f 'broadcast' -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
     logger.debug(c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))
