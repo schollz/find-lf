@@ -28,7 +28,7 @@ import requests
 #     print("GPIO not available")
 
 
-def process_scan(output):
+def process_scan(output,args):
     # lastFiveMinutes = datetime.datetime.now() - datetime.timedelta(seconds=1)
     # lastFiveMinutes = datetime.datetime(2016, 1, 6, 12, 6, 54, 684435) - datetime.timedelta(seconds=1)
     fingerprints = {}
@@ -81,7 +81,18 @@ def run_command(command):
 def run_scan(timeOfScan):
     logger.debug("Running scan")
     data = []
-    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i wlan1 -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % timeOfScan
+    c = "iw wlan0 info"
+    logger.debug(c)
+    for line in run_command(c):
+        data.append(line.decode('utf-8'))
+
+    wlan = "wlan0"
+    # 98:de:d0 = TP LINK, what we want to use for scanning
+    if "98:de:d0" not in "".join(data).lower():
+        wlan = "wlan1"
+
+    data = []
+    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % (timeOfScan,wlan)
     logger.debug(c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))

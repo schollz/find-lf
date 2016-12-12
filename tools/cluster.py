@@ -83,6 +83,8 @@ def start(ip, password, group, lfserver):
 
 
 def initialize(ip, password):
+    group = config['group']
+    lfserver = config['lfserver']
     c = 'sshpass -p %(password)s ssh pi@%(ip)s "rm initialize.sh"'
     logger.debug("starting %s" % ip)
     r, code = run_command(
@@ -101,7 +103,7 @@ def initialize(ip, password):
         c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
     logger.debug(r)
     logger.debug(code)
-    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo initialize.sh"'
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo ./initialize.sh"'
     logger.debug("starting %s" % ip)
     r, code = run_command(
         c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
