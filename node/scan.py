@@ -60,7 +60,7 @@ def process_scan(output,args):
             continue
         print(mac)
         print(fingerprints[mac])
-        fingerprints2.append({"mac": mac, "rssi": statistics.median(fingerprints[mac])})
+        fingerprints2.append({"mac": mac, "rssi": int(statistics.median(fingerprints[mac]))})
 
     logger.debug("Processed %d lines, found %d fingerprints" %
                  (len(output.splitlines()), len(fingerprints2)))
