@@ -44,7 +44,7 @@ def process_scan(output,args):
                 "%b %d, %Y %H:%M:%S.%f")
             mac = line.split()[5]
             mac2 = line.split()[6]
-            if mac == mac2:
+            if mac == mac2 or 'ff:ff:ff:ff:ff:ff' not in mac2:
                 continue
             rssi = line.split()[7].split(',')[0]
             if mac not in fingerprints:
@@ -94,7 +94,7 @@ def run_scan(timeOfScan):
         wlan = "wlan1"
 
     data = []
-    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -f 'broadcast' -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
+    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
     logger.debug(c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))
