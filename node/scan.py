@@ -57,6 +57,8 @@ def process_scan(output,args):
     for mac in fingerprints:
         if len(fingerprints[mac]) == 0:
             continue
+        print(mac)
+        print(fingerprints[mac])
         fingerprints2.append({"mac": mac, "rssi": int(
             round(sum(fingerprints[mac]) / len(fingerprints[mac])))})
 
