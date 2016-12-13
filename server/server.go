@@ -63,7 +63,7 @@ var switches = struct {
 }{m: make(map[string]string)}
 
 var ServerAddress, Group, Port string
-var MinimumNumberOfRouters int
+var MinimumNumberOfRouters, MinRSSI int
 var CollectionTime int
 
 func main() {
@@ -72,6 +72,7 @@ func main() {
 	flag.StringVar(&Port, "port", "8072", "port to run this server on (default: 8072)")
 	flag.StringVar(&ServerAddress, "server", "https://ml.internalpositioning.com", "address to FIND server")
 	flag.IntVar(&MinimumNumberOfRouters, "min", 0, "minimum number of routers before sending fingerprint")
+	flag.IntVar(&MinRSSI, "rssi", -60, "minimum RSSI that must exist to send on")
 	flag.IntVar(&CollectionTime, "time", 10, "collection time to average fingerprints (in seconds)")
 	flag.Parse()
 
@@ -239,10 +240,17 @@ func sendFingerprints(m map[string]map[string]map[string]int) {
 
 			fingerprint := make([]Router, len(m[group][user]))
 			num := 0
+			hasOneGreaterThanMinRSSI := false
 			for mac := range m[group][user] {
 				fingerprint[num].Mac = mac
 				fingerprint[num].Rssi = m[group][user][mac]
+				if fingerprint[num].Rssi > MinRSSI {
+					hasOneGreaterThanMinRSSI = true
+				}
 				num++
+			}
+			if !hasOneGreaterThanMinRSSI {
+				continue
 			}
 			data.WifiFingerprint = fingerprint
 
