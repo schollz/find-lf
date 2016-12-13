@@ -2,9 +2,9 @@
 
 This is a extension of FIND, [the Framework for Internal Navigation and Discovery](https://github.com/schollz/find), which is based on the idea of [Lucius Fox's sonar system *Batman Begins*](http://batman.wikia.com/wiki/Lucius_Fox_(Morgan_Freeman)) that is used to track cellphones.
 
-The system is based off a network of Raspberry Pis which sniff the WiFi probe requests from cellphones and sends these parcels to a central server which compiles and forwards the fingerprint to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints. 
+The system is based off a network of Raspberry Pis which sniff the WiFi probe requests from cellphones and sends these parcels to a central server which compiles and forwards the fingerprint to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints.
 
-This system does not require a phone to be logged into a particular WiFi - it will track *any phone with WiFi enabled*! This system does *not* use time-of-flight triangulation - this system requires a user to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below). 
+This system does not require a phone to be logged into a particular WiFi - it will track *any phone with WiFi enabled*! This system also does not require installing any apps on a phone. This system does *not* use time-of-flight triangulation - this system requires a user to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below).
 
 # Requirements
 
@@ -31,9 +31,9 @@ wget https://raw.githubusercontent.com/schollz/find-lf/master/tools/cluster.py
 ```
 and then install `sshpass`.
 
-Then, to initialize, just run 
+Then, to initialize, just run
 ```
-python3 cluster.py track
+python3 cluster.py initialize
 ```
 to which you'll be asked for the information about your cluster. Choose any `group` that you want, but remember it, as you will need it to login to the FIND server. For the `lf address`, you can use the default (a public server) or set it to your own. See `find-lf/server/README.md` for more information.
 
@@ -43,7 +43,7 @@ Startup the Pi cluster using `python3.py cluster start`. You can check the statu
 
 After the cluster is up in running, you need to do learning. Take a smart phone and identify its mac address, something like `AA:BB:CC:DD:EE:FF`. Take your phone to a location. Then activate the find-lf server to do learning either by switching on [the find-lf website](https://lf.internalpositioning.com) or running `python3 cluster.py -u AA:BB:CC:DD:EE:FF -l location`.
 
-*This is important!* Before moving to a new location, make sure to turn off learning by switching to tracking. Activate this on the find-lf server using the [the find-lf website](https://lf.internalpositioning.com) or use `python3 cluster.py track`. 
+*This is important!* Before moving to a new location, make sure to turn off learning by switching to tracking. Activate this on the find-lf server using the [the find-lf website](https://lf.internalpositioning.com) or use `python3 cluster.py track`.
 
 Repeat these steps for as many locations as you want.
 
