@@ -90,10 +90,23 @@ def run_scan(timeOfScan):
     for line in run_command(c):
         data.append(line.decode('utf-8'))
 
-    wlan = "wlan0"
-    # 98:de:d0 = TP LINK, what we want to use for scanning
-    if "98:de:d0" not in "".join(data).lower():
-        wlan = "wlan1"
+    # Test if wlan0 / wlan1
+    wlan = "wlan0"    
+    data = []
+    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
+    logger.debug(c)
+    for line in run_command(c):
+        data.append(line.decode('utf-8'))
+    print("".join(data))
+
+    wlan = "wlan1"    
+    data = []
+    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
+    logger.debug(c)
+    for line in run_command(c):
+        data.append(line.decode('utf-8'))
+    print("".join(data))
+
 
     data = []
     c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)

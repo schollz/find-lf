@@ -55,7 +55,10 @@ def isRunning(ip, password):
     r, code = run_command(c % {'password': password, 'ip': ip})
     logger.debug(r)
     logger.debug(code)
-    if len(r.strip()) == 0:
+    if code != 0:
+    	print(r.strip())
+    if len(r.strip()) == 0 or code != 0:
+
         return False
     else:
         return True
