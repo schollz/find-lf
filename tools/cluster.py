@@ -56,7 +56,7 @@ def isRunning(ip, password):
     logger.debug(r)
     logger.debug(code)
     if code != 0:
-    	print(r.strip())
+        print(r.strip())
     if len(r.strip()) == 0 or code != 0:
 
         return False
@@ -134,6 +134,21 @@ def main(command, config):
                 print("stopped %s" % ip)
             else:
                 print("could not kill %s" % ip)
+    elif command == "list":
+        print("scanning all ips...please wait")
+        c = 'nmap -sP 192.168.1.0/24'
+        r, code = run_command(c)
+        logger.debug(r)
+        logger.debug(code)
+        lines = []
+        for line in r.splitlines():
+            if "scan report" in line:
+                lines.append(line.split("for ")[1])
+        r, code = run_command(c)
+        for line in r.splitlines():
+            if "scan report" in line:
+                lines.append(line.split("for ")[1])
+        print("\n".join(sorted(list(set(lines)))))
     elif command == "initialize":
         for ip in config['pis']:
             initialize(ip, config['password'])
@@ -199,12 +214,11 @@ def main(command, config):
                            'location': config['location']})
         print(response)
     else:
-        return "commands are only: start stop status"
-
-if __name__ == '__main__':
-    print("""
+        print("""
 python3 cluster.py COMMAND
 
+    list:
+        list computers on the network
     status:
         get the current status of all Pis in the cluster
     stop:
@@ -223,6 +237,7 @@ python3 cluster.py COMMAND
         tell it to perform learning in the specified location for user/group.
 
 """)
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument(
