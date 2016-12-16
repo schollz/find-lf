@@ -90,7 +90,8 @@ def run_scan(timeOfScan,wlan):
     # for line in run_command(c):
     #     data.append(line.decode('utf-8'))
 
-    c = "sudo ifconfig wlan1 up"
+    data = []
+    c = "sudo ifconfig %s up" % (wlan)
     logger.debug(c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))
