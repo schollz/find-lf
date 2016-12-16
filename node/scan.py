@@ -155,15 +155,15 @@ def main():
 
     # Check which interface
     # Test if wlan0 / wlan1
-    wlan = "wlan0"    
-    data = []
-    c = "/usr/bin/timeout 10s /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (wlan)
-    logger.debug(c)
-    for line in run_command(c):
-        data.append(line.decode('utf-8'))
-    output1 = "".join(data)
-    if "doesn't support monitor mode" in output1:
-        wlan = "wlan1"
+    wlan = "wlan1"    
+    # data = []
+    # c = "/usr/bin/timeout 10s /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (wlan)
+    # logger.debug(c)
+    # for line in run_command(c):
+    #     data.append(line.decode('utf-8'))
+    # output1 = "".join(data)
+    # if "doesn't support monitor mode" in output1:
+    #     wlan = "wlan1"
 
 
     # Startup scanning

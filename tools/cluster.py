@@ -84,6 +84,15 @@ def start(ip, password, group, lfserver):
     logger.debug(r)
     logger.debug(code)
 
+def downloadNewScan(ip, password):
+    group = config['group']
+    lfserver = config['lfserver']
+    c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
+    r, code = run_command(
+        c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
+    logger.debug(r)
+    logger.debug(code)
+
 
 def initialize(ip, password):
     group = config['group']
@@ -129,6 +138,10 @@ def main(command, config):
         for ip in config['pis']:
             initialize(ip, config['password'])
             print("initialized %s" % ip)
+    elif command == "download":
+        for ip in config['pis']:
+            downloadNewScan(ip, config['password'])
+            print("downloaded for %s" % ip)
     elif command == "status":
         logger.debug("Getting status")
         for ip in config['pis']:
