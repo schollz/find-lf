@@ -82,31 +82,13 @@ def run_command(command):
     return iter(p.stdout.readline, b'')
 
 
-def run_scan(timeOfScan):
+def run_scan(timeOfScan,wlan):
     logger.debug("Running scan")
     data = []
     c = "iw wlan0 info"
     logger.debug(c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))
-
-    # Test if wlan0 / wlan1
-    wlan = "wlan0"    
-    data = []
-    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
-    logger.debug(c)
-    for line in run_command(c):
-        data.append(line.decode('utf-8'))
-    print("".join(data))
-
-    wlan = "wlan1"    
-    data = []
-    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
-    logger.debug(c)
-    for line in run_command(c):
-        data.append(line.decode('utf-8'))
-    print("".join(data))
-
 
     data = []
     c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
@@ -171,6 +153,19 @@ def main():
     logger.addHandler(fh)
     logger.addHandler(ch)
 
+    # Check which interface
+    # Test if wlan0 / wlan1
+    wlan = "wlan0"    
+    data = []
+    c = "/usr/bin/timeout 3s /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (wlan)
+    logger.debug(c)
+    for line in run_command(c):
+        data.append(line.decode('utf-8'))
+    output1 = "".join(data)
+    if "doesn't support monitor mode" in output1:
+        wlan = "wlan1"
+
+
     # Startup scanning
     print("Using server " + args.server)
     logger.debug("Using server " + args.server)
@@ -178,7 +173,7 @@ def main():
     logger.debug("Using group " + args.group)
     while True:
         try:
-            scan = run_scan(int(args.time))
+            scan = run_scan(int(args.time),wlan)
             payload = process_scan(scan, args)
             payload['group'] = args.group
             if len(payload['signals']) > 0:
