@@ -92,7 +92,6 @@ def run_scan(timeOfScan,wlan):
 
     data = []
     c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
-    logger.debug(c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))
     return "".join(data)
