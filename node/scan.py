@@ -90,6 +90,12 @@ def run_scan(timeOfScan,wlan):
     # for line in run_command(c):
     #     data.append(line.decode('utf-8'))
 
+    c = "sudo ifconfig wlan1 up"
+    logger.debug(c)
+    for line in run_command(c):
+        data.append(line.decode('utf-8'))
+    logger.debug("".join(data))
+
     data = []
     c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
     logger.debug("Running command: '%s'" % c)
