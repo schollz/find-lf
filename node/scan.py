@@ -84,14 +84,15 @@ def run_command(command):
 
 def run_scan(timeOfScan,wlan):
     logger.debug("Running scan")
-    data = []
-    c = "iw wlan0 info"
-    logger.debug(c)
-    for line in run_command(c):
-        data.append(line.decode('utf-8'))
+    # data = []
+    # c = "iw wlan0 info"
+    # logger.debug(c)
+    # for line in run_command(c):
+    #     data.append(line.decode('utf-8'))
 
     data = []
     c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
+    logger.debug("Running command: '%s'" % c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))
     return "".join(data)
@@ -156,7 +157,7 @@ def main():
     # Test if wlan0 / wlan1
     wlan = "wlan0"    
     data = []
-    c = "/usr/bin/timeout 3s /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (wlan)
+    c = "/usr/bin/timeout 10s /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (wlan)
     logger.debug(c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))

@@ -15,11 +15,13 @@ This system does not require being logged into a particular WiFi - it will track
 
 ## 1. Initialize Pis
 
-[Install Raspbian lite](https://www.raspberrypi.org/downloads/raspbian/) onto a Pi. Make sure to give it a unique hostname but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
+[Install Raspbian lite](https://www.raspberrypi.org/downloads/raspbian/) onto a Pi. Make sure to give it a unique hostname (its useful to prefix them with something like "pi-") but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
 ```
 sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh)"
 ```
 Alternatively, you can do this using [my script](https://raw.githubusercontent.com/schollz/find-lf/master/node/pibakery.xml) for [PiBakery](http://www.pibakery.org/).
+
+Also edit `/etc/network/interfaces` and remove the `wpa-conf` line for `wlan1`.
 
 Do this for several Pis and then plug in the WiFi adapter that has "monitor" mode.
 
@@ -36,6 +38,12 @@ Then, to initialize, just run
 python3 cluster.py initialize
 ```
 to which you'll be asked for the information about your cluster. Choose any `group` that you want, but remember it, as you will need it to login to the FIND server. For the `lf address`, you can use the default (a public server) or set it to your own. See `find-lf/server/README.md` for more information.
+
+To easily find which hostnames/IPs are on your network, use
+
+```
+nmap -sP 192.168.1.0/24 | grep "192.168.1."
+```
 
 Startup the Pi cluster using `python3.py cluster start`. You can check the status with `python3 cluster.py status`
 
