@@ -60,6 +60,12 @@ class CommandThread (threading.Thread):
             self.start_pi()
         elif self.command == "update":
             self.update_scanpy()
+        elif self.command == "initialize":
+            self.initialize()
+        elif self.command == "restart":
+            self.restart_pi()
+        elif self.command == "stop":
+            self.kill_pi()
         else:
             self.output = "idk"
 
@@ -85,6 +91,9 @@ class CommandThread (threading.Thread):
             c % {'password': self.config['password'], 'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
+        if code == 0 or code == 255:
+            self.output = "unable to connect to " + self.config['address']
+            return
         foo, self.output = self.isRunning()
 
     def start_pi(self):
@@ -95,6 +104,9 @@ class CommandThread (threading.Thread):
                  'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
+        if code == 0 or code == 255:
+            self.output = "unable to connect to " + self.config['address']
+            return
         foo, self.output = self.isRunning()
 
     def update_scanpy(self):
@@ -103,10 +115,40 @@ class CommandThread (threading.Thread):
             c % {'password': self.config['password'], 'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
-        if code != 0 and code != 255:
-            self.output = "updated " + self.config['address']
-        else:
+        if code == 0 or code == 255:
             self.output = "unable to connect to " + self.config['address']
+            return
+        self.output = "updated " + self.config['address']
+
+    def initialize(self):
+        print("initializing %s" % self.config['address'])
+        c = 'sshpass -p %(password)s ssh %(address)s "rm initialize.sh"'
+        r, code = run_command(
+            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+        logger.debug(r)
+        logger.debug(code)
+        if code == 0 or code == 255:
+            self.output = "unable to connect to " + self.config['address']
+            return
+        c = 'sshpass -p %(password)s ssh pi@%(ip)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
+        r, code = run_command(
+            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+        logger.debug(r)
+        logger.debug(code)
+        c = 'sshpass -p %(password)s ssh pi@%(ip)s "chmod +x initialize.sh"'
+        r, code = run_command(
+            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+        logger.debug(r)
+        logger.debug(code)
+        c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo ./initialize.sh"'
+        r, code = run_command(
+            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+        logger.debug(r)
+        logger.debug(code)
+
+    def restart_pi(self):
+        self.kill_pi()
+        self.start_pi()
 
     def return_output(self):
         return self.output
@@ -141,34 +183,6 @@ def getURL(url, params):
         return "Problem requesting"
 
 
-# def initialize(ip, password):
-#     group = config['group']
-#     lfserver = config['lfserver']
-#     c = 'sshpass -p %(password)s ssh pi@%(ip)s "rm initialize.sh"'
-#     logger.debug("starting %s" % ip)
-#     r, code = run_command(
-#         c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
-#     logger.debug(r)
-#     logger.debug(code)
-#     c = 'sshpass -p %(password)s ssh pi@%(ip)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
-#     logger.debug("starting %s" % ip)
-#     r, code = run_command(
-#         c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
-#     logger.debug(r)
-#     logger.debug(code)
-#     c = 'sshpass -p %(password)s ssh pi@%(ip)s "chmod +x initialize.sh"'
-#     logger.debug("starting %s" % ip)
-#     r, code = run_command(
-#         c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
-#     logger.debug(r)
-#     logger.debug(code)
-#     c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo ./initialize.sh"'
-#     logger.debug("starting %s" % ip)
-#     r, code = run_command(
-#         c % {'password': password, 'ip': ip, 'group': group, 'lfserver': lfserver})
-#     logger.debug(r)
-#     logger.debug(code)
-
 def print_help():
     print("""
 python3 cluster.py COMMAND
@@ -199,6 +213,41 @@ def main(args, config):
     command = args.command.strip()
     logger.debug(config)
     logger.debug("Processing " + command)
+
+
+    if command == "track":
+        response = getURL(config['lfserver'] +
+                          "/switch", {'group': config['group']})
+        print(response)
+        return
+    elif command == "learn":
+        if config['user'] == "" or config['location'] == "":
+            print(
+                "Must include name and location! Use ./cluster -u USER -l LOCATION learn")
+            return
+        config['user'] = config['user'].replace(':', '').strip()
+        response = getURL(config['lfserver'] + "/switch",
+                          {'group': config['group'],
+                           'user': config['user'],
+                           'location': config['location']})
+        return
+    elif command == "list":
+        print("scanning all ips...please wait")
+        c = 'nmap -sP 192.168.1.0/24'
+        r, code = run_command(c)
+        logger.debug(r)
+        logger.debug(code)
+        lines = []
+        for line in r.splitlines():
+            if "scan report" in line:
+                lines.append(line.split("for ")[1])
+        r, code = run_command(c)
+        for line in r.splitlines():
+            if "scan report" in line:
+                lines.append(line.split("for ")[1])
+        print("\n".join(sorted(list(set(lines)))))
+        return
+
     threads = []
     for pi in config['pis']:
         config['address'] = pi
