@@ -6,16 +6,17 @@ The system uses a network of Raspberry Pis which sniff the WiFi probe requests f
 
 This system does not require being logged into a particular WiFi - it will track *any phone/device with WiFi enabled*! This system also does not require installing any apps on a phone. Tracking occurs anytime a WiFi chip makes a probe request (which is every minute or so). For this to work, it requires a one-time setup to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below).
 
-# How does it work
+# How does it work?
 
-You can setup Raspberry Pis around a house in a way that they will see different signal strengths from various WiFi devices.
+You can setup Raspberry Pis around a house in a way that they will see different signal strengths from various WiFi devices. Each WiFi-enabled device see requests from the various Raspberry Pis with different strengths (see colored bars in Figure below). These graphs are a *fingerprint* which can be used to uniquely classify the location.
 
+![](/docs/graphic/room-schematic.png)
 
-![](https://github.com/schollz/find-lf/blob/master/docs/graphic/room-schematic.png)
+The Raspberry Pi cluster gets probe requests to various WiFi devices, and compiles these and forwards them to a FIND-LF server. This FIND-LF server then sends a compiled fingerprint to a main server. This system uses WiFi probe requests, which occur on any WiFi enabled device, as long as WiFi is enabled. These probe requests generally occur when a scan takes place, which is every few minutes when the phone is being used.
 
-The Raspberry Pi cluster gets probe requests to various WiFi devices, and compiles these and forwards them to a FIND-LF server. This FIND-LF server then sends a compiled fingerprint to a main server.
+![](/docs/graphic/find-lf-example.png)
 
-![](https://github.com/schollz/find-lf/blob/master/docs/graphic/find-lf-example.png)
+Once sent to the FIND server, the location can be directly determined. For more information about this, see the [FIND README](https://github.com/schollz/find).
 
 # Requirements
 
