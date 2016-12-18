@@ -6,6 +6,17 @@ The system uses a network of Raspberry Pis which sniff the WiFi probe requests f
 
 This system does not require being logged into a particular WiFi - it will track *any phone/device with WiFi enabled*! This system also does not require installing any apps on a phone. Tracking occurs anytime a WiFi chip makes a probe request (which is every minute or so). For this to work, it requires a one-time setup to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below).
 
+# How does it work
+
+You can setup Raspberry Pis around a house in a way that they will see different signal strengths from various WiFi devices.
+
+
+![](https://github.com/schollz/find-lf/blob/master/docs/graphic/room-schematic.png)
+
+The Raspberry Pi cluster gets probe requests to various WiFi devices, and compiles these and forwards them to a FIND-LF server. This FIND-LF server then sends a compiled fingerprint to a main server.
+
+![](https://github.com/schollz/find-lf/blob/master/docs/graphic/find-lf-example.png)
+
 # Requirements
 
 - Several Raspberry Pis, where each Raspberry pi has [a USB Wifi adapter that supports "monitor mode"](http://elinux.org/RPi_USB_Wi-Fi_Adapters), like the [TL-WN722N](https://www.amazon.com/gp/product/B002SZEOLG/ref=oh_aui_detailpage_o03_s00?ie=UTF8&psc=1), and it additionally has a second internet connection via ethernet or another adapter
