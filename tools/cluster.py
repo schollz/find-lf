@@ -251,7 +251,7 @@ def main(args, config):
     threads = []
     for pi in config['pis']:
         config['address'] = pi
-        threads.append(CommandThread(config.copy(), command,args.verbose))
+        threads.append(CommandThread(config.copy(), command,args.debug))
 
     # Start new Threads
     for thread in threads:
@@ -271,97 +271,9 @@ def main(args, config):
         else:
             print(output)
 
-#     c = ""
-#     if command == "stop":
-#         for ip in config['pis']:
-#             if kill(ip, config['password']):
-#                 print("stopped %s" % ip)
-#             else:
-#                 print("could not kill %s" % ip)
-#     elif command == "list":
-#         print("scanning all ips...please wait")
-#         c = 'nmap -sP 192.168.1.0/24'
-#         r, code = run_command(c)
-#         logger.debug(r)
-#         logger.debug(code)
-#         lines = []
-#         for line in r.splitlines():
-#             if "scan report" in line:
-#                 lines.append(line.split("for ")[1])
-#         r, code = run_command(c)
-#         for line in r.splitlines():
-#             if "scan report" in line:
-#                 lines.append(line.split("for ")[1])
-#         print("\n".join(sorted(list(set(lines)))))
-#     elif command == "initialize":
-#         for ip in config['pis']:
-#             initialize(ip, config['password'])
-#             print("initialized %s" % ip)
-#     elif command == "download":
-#         for ip in config['pis']:
-#             downloadNewScan(ip, config['password'])
-#             print("downloaded for %s" % ip)
-#     elif command == "status":
-#         logger.debug("Getting status")
-#         for ip in config['pis']:
-#             if isRunning(ip, config['password']):
-#                 print("%s is scanning" % ip)
-#             else:
-#                 print("%s is not scanning" % ip)
-#     elif command == "start":
-#         for ip in config['pis']:
-#             if not isRunning(ip, config['password']):
-#                 start(
-#                     ip,
-#                     config['password'],
-#                     config['group'],
-#                     config['lfserver'])
-#                 print("started %s" % ip)
-#             else:
-#                 print("%s is already scanning" % ip)
-#     elif command == "restart":
-#         for ip in config['pis']:
-#             if not isRunning(ip, config['password']):
-#                 start(
-#                     ip,
-#                     config['password'],
-#                     config['group'],
-#                     config['lfserver'])
-#                 if isRunning(ip, config['password']):
-#                     print("started %s" % ip)
-#                 else:
-#                     print("could not start %s" % ip)
-#             else:
-#                 kill(ip, config['password'])
-#                 start(
-#                     ip,
-#                     config['password'],
-#                     config['group'],
-#                     config['lfserver'])
-#                 if isRunning(ip, config['password']):
-#                     print("restarted %s" % ip)
-#                 else:
-#                     print("could not restart %s" % ip)
-#     elif command == "track":
-#         response = getURL(config['lfserver'] +
-#                           "/switch", {'group': config['group']})
-#         print(response)
-#     elif command == "learn":
-#         if config['user'] == "" or config['location'] == "":
-#             print(
-#                 "Must include name and location! Use ./cluster -u USER -l LOCATION learn")
-#             return
-#         config['user'] = config['user'].replace(':', '').strip()
-#         response = getURL(config['lfserver'] + "/switch",
-#                           {'group': config['group'],
-#                            'user': config['user'],
-#                            'location': config['location']})
-#         print(response)
-#     else:
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument(
         "-c",
         "--config",
@@ -393,7 +305,7 @@ if __name__ == '__main__':
     # create file handler which logs even debug messages
     fh = logging.FileHandler('cluster.log')
     ch = logging.StreamHandler()
-    if args.verbose:
+    if args.debug:
         fh.setLevel(logging.DEBUG)
         ch.setLevel(logging.DEBUG)
     else:
