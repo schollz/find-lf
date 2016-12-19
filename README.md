@@ -81,3 +81,7 @@ You can also track a single phone using https://ml.internalpositioning.com/GROUP
 # License
 
 Copyright 2015-2017 Zack Scholl (zack@hypercubeplatforms.com, @zack_118). All rights reserved. Use of this source code is governed by a AGPL license that can be found in the LICENSE file.
+
+# Todo
+
+- [ ] Determine the wlan0/1 of the Wi-Fi adapter automatically (currently it defaults to wlan1, which is right most of the time)
