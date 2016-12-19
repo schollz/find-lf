@@ -75,10 +75,10 @@ class CommandThread (threading.Thread):
 
     def isRunning(self):
         self.logger.debug("Testing if isRunning %(address)s" % self.config)
-        c = """sshpass -p %(password)s ssh %(address)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip(
+        c = """ssh %(address)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip(
         )
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address']})
+            c % {'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
         if code != 0:
@@ -89,9 +89,9 @@ class CommandThread (threading.Thread):
             return False, "%s is not scanning" % self.config['address']
 
     def kill_pi(self):
-        c = 'sshpass -p %(password)s ssh %(address)s "sudo pkill -9 python3"'
+        c = 'ssh %(address)s "sudo pkill -9 python3"'
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address']})
+            c % {'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
         if code == 0 or code == 255:
@@ -103,9 +103,9 @@ class CommandThread (threading.Thread):
         return True
 
     def start_pi(self):
-        c = 'sshpass -p %(password)s ssh %(address)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
+        c = 'ssh %(address)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address'],
+            c % {'address': self.config['address'],
                  'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
@@ -119,9 +119,9 @@ class CommandThread (threading.Thread):
             self.logger.info("could not kill")
 
     def update_scanpy(self):
-        c = 'sshpass -p %(password)s ssh %(address)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
+        c = 'ssh %(address)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address']})
+            c % {'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
         if code == 0 or code == 255:
@@ -131,27 +131,27 @@ class CommandThread (threading.Thread):
 
     def initialize(self):
         self.logger.info("initializing...")
-        c = 'sshpass -p %(password)s ssh -o ConnectTimeout=10 %(address)s "rm initialize.sh"'
+        c = 'ssh -o ConnectTimeout=10 %(address)s "rm initialize.sh"'
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+            c % {'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
         if code == 0 or code == 255:
             self.logger.info("unable to connect")
             return
-        c = 'sshpass -p %(password)s ssh %(address)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
+        c = 'ssh %(address)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+            c % {'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
-        c = 'sshpass -p %(password)s ssh %(address)s "chmod +x initialize.sh"'
+        c = 'ssh %(address)s "chmod +x initialize.sh"'
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+            c % {'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
-        c = 'sshpass -p %(password)s ssh %(address)s "sudo ./initialize.sh"'
+        c = 'ssh %(address)s "sudo ./initialize.sh"'
         r, code = run_command(
-            c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+            c % {'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
         self.logger.info("initialized")
@@ -256,6 +256,16 @@ def main(args, config):
                 lines.append(line.split("for ")[1])
         print("\n".join(sorted(list(set(lines)))))
         return
+    elif command == "initialize":
+        print("copying ips")
+        for address in config['pis']:
+            c = 'ssh-copy-id %(address)s'
+            r, code = run_command(c % {'address':address})
+            if code == 1:
+                print("Could not connect to %s" % address)
+                return
+            logger.debug(r)
+            logger.debug(code)
 
     threads = []
     for pi in config['pis']:
@@ -322,8 +332,6 @@ if __name__ == '__main__':
 
     config = {}
     if not os.path.exists(args.config):
-        password = input('Enter Pi password: ')
-        config['password'] = password.strip()
         pis = []
         while True:
             pi = input('Enter Pi address (enter if no more): ')
