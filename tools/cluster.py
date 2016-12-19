@@ -27,8 +27,7 @@ class CommandThread (threading.Thread):
         threading.Thread.__init__(self)
         self.config = config
         self.command = command
-        self.logger = logging.getLogger(
-            self.command + "-" + self.config['address'])
+        self.logger = logging.getLogger(self.config['address'])
         self.logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler('cluster.log')
         ch = logging.StreamHandler()
@@ -36,13 +35,15 @@ class CommandThread (threading.Thread):
             fh.setLevel(logging.DEBUG)
             ch.setLevel(logging.DEBUG)
         else:
-            fh.setLevel(logging.ERROR)
-            ch.setLevel(logging.ERROR)
+            fh.setLevel(logging.INFO)
+            ch.setLevel(logging.INFO)
         # create formatter and add it to the handlers
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
         fh.setFormatter(formatter)
-        ch.setFormatter(formatter)
+        formatterSimple = logging.Formatter(
+            '%(asctime)s - %(name)s - %(message)s')
+        ch.setFormatter(formatterSimple)
         # add the handlers to the logger
         self.logger.addHandler(fh)
         self.logger.addHandler(ch)
@@ -54,6 +55,7 @@ class CommandThread (threading.Thread):
             "Performing " + self.command + " on " + self.config['address'])
         if self.command == "status":
             foo, self.output = self.isRunning()
+            self.logger.info(self.output)
         elif self.command == "kill":
             self.kill_pi()
         elif self.command == "start":
@@ -67,7 +69,7 @@ class CommandThread (threading.Thread):
         elif self.command == "stop":
             self.kill_pi()
         else:
-            self.output = "idk"
+            print_help()
 
     def isRunning(self):
         self.logger.debug("Testing if isRunning %(address)s" % self.config)
@@ -92,9 +94,9 @@ class CommandThread (threading.Thread):
         self.logger.debug(r)
         self.logger.debug(code)
         if code == 0 or code == 255:
-            self.output = "unable to connect to " + self.config['address']
+            self.logger.info("unable to connect")
             return
-        foo, self.output = self.isRunning()
+        foo, foo2 = self.isRunning()
 
     def start_pi(self):
         print("starting %s" % self.config['address'])
@@ -105,9 +107,11 @@ class CommandThread (threading.Thread):
         self.logger.debug(r)
         self.logger.debug(code)
         if code == 0 or code == 255:
-            self.output = "unable to connect to " + self.config['address']
+            self.logger.info("unable to connect")
             return
-        foo, self.output = self.isRunning()
+        stillRunning, foo2 = self.isRunning()
+        if not stillRunning:
+            self.output = "killed %s" % self.config['address']
 
     def update_scanpy(self):
         c = 'sshpass -p %(password)s ssh %(address)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
@@ -116,35 +120,36 @@ class CommandThread (threading.Thread):
         self.logger.debug(r)
         self.logger.debug(code)
         if code == 0 or code == 255:
-            self.output = "unable to connect to " + self.config['address']
+            self.logger.info("unable to connect")
             return
-        self.output = "updated " + self.config['address']
+        self.output = "updated %s" % self.config['address']
 
     def initialize(self):
-        print("initializing %s" % self.config['address'])
-        c = 'sshpass -p %(password)s ssh %(address)s "rm initialize.sh"'
+        self.logger.info("initializing...")
+        c = 'sshpass -p %(password)s ssh -o ConnectTimeout=10 %(address)s "rm initialize.sh"'
         r, code = run_command(
             c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
-        logger.debug(r)
-        logger.debug(code)
+        self.logger.debug(r)
+        self.logger.debug(code)
         if code == 0 or code == 255:
-            self.output = "unable to connect to " + self.config['address']
+            self.logger.info("unable to connect")
             return
-        c = 'sshpass -p %(password)s ssh pi@%(ip)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
+        c = 'sshpass -p %(password)s ssh %(address)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
         r, code = run_command(
             c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
-        logger.debug(r)
-        logger.debug(code)
-        c = 'sshpass -p %(password)s ssh pi@%(ip)s "chmod +x initialize.sh"'
+        self.logger.debug(r)
+        self.logger.debug(code)
+        c = 'sshpass -p %(password)s ssh %(address)s "chmod +x initialize.sh"'
         r, code = run_command(
             c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
-        logger.debug(r)
-        logger.debug(code)
-        c = 'sshpass -p %(password)s ssh pi@%(ip)s "sudo ./initialize.sh"'
+        self.logger.debug(r)
+        self.logger.debug(code)
+        c = 'sshpass -p %(password)s ssh %(address)s "sudo ./initialize.sh"'
         r, code = run_command(
             c % {'password': self.config['password'], 'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
-        logger.debug(r)
-        logger.debug(code)
+        self.logger.debug(r)
+        self.logger.debug(code)
+        self.logger.info("initialized")
 
     def restart_pi(self):
         self.kill_pi()
@@ -262,15 +267,6 @@ def main(args, config):
         except:
             pass
 
-    # Print output
-    for thread in threads:
-        output = thread.return_output()
-        if output == "idk":
-            print_help()
-            break
-        else:
-            print(output)
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", action="store_true")
@@ -309,8 +305,8 @@ if __name__ == '__main__':
         fh.setLevel(logging.DEBUG)
         ch.setLevel(logging.DEBUG)
     else:
-        fh.setLevel(logging.ERROR)
-        ch.setLevel(logging.ERROR)
+        fh.setLevel(logging.INFO)
+        ch.setLevel(logging.INFO)
     # create formatter and add it to the handlers
     formatter = logging.Formatter(
         '%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
