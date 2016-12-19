@@ -21,7 +21,7 @@ Once sent to the FIND server, the location can be directly determined. For more 
 # Requirements
 
 - Several Raspberry Pis, where each Raspberry pi has [a USB Wifi adapter that supports "monitor mode"](http://elinux.org/RPi_USB_Wi-Fi_Adapters), like the [TL-WN722N](https://www.amazon.com/gp/product/B002SZEOLG/ref=oh_aui_detailpage_o03_s00?ie=UTF8&psc=1), and it additionally has a second internet connection via ethernet or another adapter
-- A computer with Python3 and [sshpass](https://gist.github.com/arunoda/7790979#file-gistfile1-md) installed
+- A computer with Python3 and SSH installed
 
 # Setup
 
@@ -39,11 +39,16 @@ Do this for several Pis and then plug in the WiFi adapter that has "monitor" mod
 
 ## 2. Start Pi cluster
 
-First download the script that makes it easy to access the cluster
+First make sure you have SSH installed and nmap.
+
+```
+sudo apt-get install openssh-client openssh-server nmap
+```
+
+Then download `clsuter.py` for accessing the cluster
 ```
 wget https://raw.githubusercontent.com/schollz/find-lf/master/tools/cluster.py
 ```
-and then install `sshpass`.
 
 Then, to initialize, just run
 ```
@@ -54,7 +59,7 @@ to which you'll be asked for the information about your cluster. Choose any `gro
 To easily find which hostnames/IPs are on your network, use
 
 ```
-nmap -sP 192.168.1.0/24 | grep "192.168.1."
+python3 cluster.py list
 ```
 
 Startup the Pi cluster using `python3.py cluster start`. You can check the status with `python3 cluster.py status`
