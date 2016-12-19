@@ -75,7 +75,7 @@ class CommandThread (threading.Thread):
 
     def isRunning(self):
         self.logger.debug("Testing if isRunning %(address)s" % self.config)
-        c = """ssh %(address)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip(
+        c = """ssh -o ConnectTimeout=10 %(address)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip(
         )
         r, code = run_command(
             c % {'address': self.config['address']})
@@ -89,7 +89,7 @@ class CommandThread (threading.Thread):
             return False, "%s is not scanning" % self.config['address']
 
     def kill_pi(self):
-        c = 'ssh %(address)s "sudo pkill -9 python3"'
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo pkill -9 python3"'
         r, code = run_command(
             c % {'address': self.config['address']})
         self.logger.debug(r)
@@ -103,7 +103,7 @@ class CommandThread (threading.Thread):
         return True
 
     def start_pi(self):
-        c = 'ssh %(address)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
         r, code = run_command(
             c % {'address': self.config['address'],
                  'group': self.config['group'], 'lfserver': self.config['lfserver']})
@@ -119,7 +119,7 @@ class CommandThread (threading.Thread):
             self.logger.info("could not kill")
 
     def update_scanpy(self):
-        c = 'ssh %(address)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
         r, code = run_command(
             c % {'address': self.config['address']})
         self.logger.debug(r)
@@ -260,7 +260,7 @@ def main(args, config):
         print("copying ips")
         for address in config['pis']:
             c = 'ssh-copy-id %(address)s'
-            r, code = run_command(c % {'address':address})
+            r, code = run_command(c % {'address': address})
             if code == 1:
                 print("Could not connect to %s" % address)
                 return
@@ -270,7 +270,8 @@ def main(args, config):
     threads = []
     for pi in config['pis']:
         config['address'] = pi
-        threads.append(CommandThread(config.copy(), command, args.debug,len(threads)==0))
+        threads.append(
+            CommandThread(config.copy(), command, args.debug, len(threads) == 0))
 
     # Start new Threads
     for thread in threads:
@@ -283,7 +284,10 @@ def main(args, config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true")
     parser.add_argument(
         "-c",
         "--config",

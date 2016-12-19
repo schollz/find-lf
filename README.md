@@ -45,7 +45,7 @@ First make sure you have SSH installed and nmap.
 sudo apt-get install openssh-client openssh-server nmap
 ```
 
-Then download `clsuter.py` for accessing the cluster
+Then download `cluster.py` for accessing the cluster
 ```
 wget https://raw.githubusercontent.com/schollz/find-lf/master/tools/cluster.py
 ```
@@ -77,7 +77,6 @@ Repeat these steps for as many locations as you want.
 Now just go to https://ml.internalpositioning.com and login using your group name to see tracking of all the phones!
 
 You can also track a single phone using https://ml.internalpositioning.com/GROUP/dashboard?user=AA:BB:CC:DD:EE:FF.
-
 
 # License
 
