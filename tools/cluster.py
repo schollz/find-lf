@@ -23,8 +23,9 @@ logger.setLevel(logging.DEBUG)
 
 class CommandThread (threading.Thread):
 
-    def __init__(self, config, command, debug):
+    def __init__(self, config, command, debug, first):
         threading.Thread.__init__(self)
+        self.first = first
         self.config = config
         self.command = command
         self.logger = logging.getLogger(self.config['address'])
@@ -69,7 +70,8 @@ class CommandThread (threading.Thread):
         elif self.command == "stop":
             self.kill_pi()
         else:
-            print_help()
+            if self.first:
+                print_help()
 
     def isRunning(self):
         self.logger.debug("Testing if isRunning %(address)s" % self.config)
@@ -87,7 +89,6 @@ class CommandThread (threading.Thread):
             return False, "%s is not scanning" % self.config['address']
 
     def kill_pi(self):
-        print("killing %s" % config['address'])
         c = 'sshpass -p %(password)s ssh %(address)s "sudo pkill -9 python3"'
         r, code = run_command(
             c % {'password': self.config['password'], 'address': self.config['address']})
@@ -95,11 +96,13 @@ class CommandThread (threading.Thread):
         self.logger.debug(code)
         if code == 0 or code == 255:
             self.logger.info("unable to connect")
-            return
-        foo, foo2 = self.isRunning()
+            return False
+        stillRunning, foo2 = self.isRunning()
+        if not stillRunning:
+            logger.info("killed")
+        return True
 
     def start_pi(self):
-        print("starting %s" % self.config['address'])
         c = 'sshpass -p %(password)s ssh %(address)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
         r, code = run_command(
             c % {'password': self.config['password'], 'address': self.config['address'],
@@ -111,7 +114,9 @@ class CommandThread (threading.Thread):
             return
         stillRunning, foo2 = self.isRunning()
         if not stillRunning:
-            self.output = "killed %s" % self.config['address']
+            self.logger.info("killed")
+        if not stillRunning:
+            self.logger.info("could not kill")
 
     def update_scanpy(self):
         c = 'sshpass -p %(password)s ssh %(address)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
@@ -122,7 +127,7 @@ class CommandThread (threading.Thread):
         if code == 0 or code == 255:
             self.logger.info("unable to connect")
             return
-        self.output = "updated %s" % self.config['address']
+        self.logger.info("updated")
 
     def initialize(self):
         self.logger.info("initializing...")
@@ -152,8 +157,8 @@ class CommandThread (threading.Thread):
         self.logger.info("initialized")
 
     def restart_pi(self):
-        self.kill_pi()
-        self.start_pi()
+        if self.kill_pi():
+            self.start_pi()
 
     def return_output(self):
         return self.output
@@ -219,7 +224,6 @@ def main(args, config):
     logger.debug(config)
     logger.debug("Processing " + command)
 
-
     if command == "track":
         response = getURL(config['lfserver'] +
                           "/switch", {'group': config['group']})
@@ -256,7 +260,7 @@ def main(args, config):
     threads = []
     for pi in config['pis']:
         config['address'] = pi
-        threads.append(CommandThread(config.copy(), command,args.debug))
+        threads.append(CommandThread(config.copy(), command, args.debug,len(threads)==0))
 
     # Start new Threads
     for thread in threads:
