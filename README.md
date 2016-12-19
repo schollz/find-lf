@@ -27,7 +27,7 @@ Once sent to the FIND server, the location can be directly determined. For more 
 
 ## 1. Initialize Pis
 
-[Install Raspbian lite](https://www.raspberrypi.org/downloads/raspbian/) onto a Pi. Make sure to give it a unique hostname (its useful to prefix them with something like "pi-") but use the same password and same username (`pi`) for each one! Then initialize the Raspberry Pi with the following script
+[Install Raspbian lite](https://www.raspberrypi.org/downloads/raspbian/) onto a Pi. If you don't use the `pi` user, make sure to give the user sudo acess. Then initialize the Raspberry Pi with the following script
 ```
 sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh)"
 ```
