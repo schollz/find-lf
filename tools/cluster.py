@@ -81,9 +81,9 @@ class CommandThread (threading.Thread):
             c % {'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
-        if code != 0:
+        if code ==255:
             return False, "unable to connect to " + self.config['address']
-        if len(r.strip()) == 0 or code != 0:
+        if len(r.strip()) != 0:
             return True, "%s is scanning" % self.config['address']
         else:
             return False, "%s is not scanning" % self.config['address']
@@ -109,14 +109,14 @@ class CommandThread (threading.Thread):
                  'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
-        if code == 0 or code == 255:
+        if code == 255:
             self.logger.info("unable to connect")
             return
         stillRunning, foo2 = self.isRunning()
         if not stillRunning:
-            self.logger.info("killed")
-        if not stillRunning:
-            self.logger.info("could not kill")
+            self.logger.info("started")
+        else:
+            self.logger.info("could not start")
 
     def update_scanpy(self):
         c = 'ssh -o ConnectTimeout=10 %(address)s "sudo wget https://raw.githubusercontent.com/schollz/find-lf/master/node/scan.py -O scan.py"'
