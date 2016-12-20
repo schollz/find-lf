@@ -5,7 +5,6 @@ The main tool is the `cluster.py` script which is a simple script used to orches
 # Requirements
 
 - Python3
-- [sshpass](https://gist.github.com/arunoda/7790979#file-gistfile1-md)
 
 # Use
 
