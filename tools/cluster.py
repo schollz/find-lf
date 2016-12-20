@@ -62,7 +62,7 @@ class CommandThread (threading.Thread):
         elif self.command == "start":
             self.start_pi()
         elif self.command == "update":
-            self.update_scanpy()
+            self.update_scanpy() 
         elif self.command == "initialize":
             self.initialize()
         elif self.command == "restart":
@@ -94,12 +94,12 @@ class CommandThread (threading.Thread):
             c % {'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
-        if code == 0 or code == 255:
+        if code == 255:
             self.logger.info("unable to connect")
             return False
         stillRunning, foo2 = self.isRunning()
         if not stillRunning:
-            logger.info("killed")
+            self.logger.info("killed")
         return True
 
     def start_pi(self):
@@ -113,7 +113,7 @@ class CommandThread (threading.Thread):
             self.logger.info("unable to connect")
             return
         stillRunning, foo2 = self.isRunning()
-        if not stillRunning:
+        if stillRunning:
             self.logger.info("started")
         else:
             self.logger.info("could not start")
@@ -124,7 +124,7 @@ class CommandThread (threading.Thread):
             c % {'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
-        if code == 0 or code == 255:
+        if code == 255:
             self.logger.info("unable to connect")
             return
         self.logger.info("updated")
@@ -136,7 +136,7 @@ class CommandThread (threading.Thread):
             c % {'address': self.config['address'], 'group': self.config['group'], 'lfserver': self.config['lfserver']})
         self.logger.debug(r)
         self.logger.debug(code)
-        if code == 0 or code == 255:
+        if code == 255:
             self.logger.info("unable to connect")
             return
         c = 'ssh %(address)s "wget https://raw.githubusercontent.com/schollz/find-lf/master/node/initialize.sh"'
