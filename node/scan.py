@@ -27,6 +27,23 @@ import requests
 #     GPIO.setup(GPIO_PIN, GPIO.IN)
 # except:
 #     print("GPIO not available")
+SINGLE_WIFI = False
+
+def restart_wifi():
+    os.system("/sbin/ifdown --force wlan0")
+    os.system("/sbin/ifup --force wlan0")
+    os.system("iwconfig wlan0 mode managed")
+    while True:
+        ping_response = subprocess.Popen(["/bin/ping", "-c1", "-w100", "lf.internalpositioning.com"], stdout=subprocess.PIPE).stdout.read()
+        if '64 bytes' in ping_response.decode('utf-8'):
+            break
+        time.sleep(1)
+
+def num_wifi_cards():
+    cmd = 'iwconfig'
+    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+    output = p.stdout.read().decode('utf-8')
+    return output.count("wlan")
 
 
 def process_scan(output,args):
@@ -93,9 +110,10 @@ def run_scan(timeOfScan,wlan):
     data = []
     c = "sudo ifconfig %s up" % (wlan)
     logger.debug(c)
-    for line in run_command(c):
-        data.append(line.decode('utf-8'))
-    logger.debug("".join(data))
+    run_command(c)
+    
+    if SINGLE_WIFI:
+        timeOfScan += 5
 
     data = []
     c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
@@ -118,6 +136,7 @@ def run_scan(timeOfScan,wlan):
 
 
 def main():
+    global SINGLE_WIFI
     # Check if SUDO
     # from
     # http://serverfault.com/questions/16767/check-admin-rights-inside-python-script
@@ -162,7 +181,11 @@ def main():
 
     # Check which interface
     # Test if wlan0 / wlan1
-    wlan = "wlan1"    
+    wlan = "wlan1"
+    SINGLE_WIFI = False
+    if num_wifi_cards() == 1:
+        SINGLE_WIFI = True
+        wlan = "wlan0"
     # data = []
     # c = "/usr/bin/timeout 10s /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (wlan)
     # logger.debug(c)
@@ -181,6 +204,10 @@ def main():
     while True:
         try:
             scan = run_scan(int(args.time),wlan)
+            if SINGLE_WIFI:
+                logger.debug("Stopping monitor mode...")
+                restart_wifi()
+                logger.debug("...restarted WiFi in managed mode")
             payload = process_scan(scan, args)
             payload['group'] = args.group
             if len(payload['signals']) > 0:
