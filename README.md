@@ -6,7 +6,7 @@ This is a extension of FIND, [the Framework for Internal Navigation and Discover
 
 The system uses a network of Raspberry Pis which sniff the WiFi probe requests from WiFi-enabled devices and sends these parcels to a central server which compiles and forwards the fingerprint to the [FIND server](https://github.com/schollz/find) which then uses machine learning to classify the location based on the unique WiFi fingerprints.
 
-This system does not require being logged into a particular WiFi - it will track *any phone/device with WiFi enabled*! (Caveat: for iOS devices it will only track if Wi-Fi is associated with a router, because of [MAC spoofing](http://blog.mojonetworks.com/ios8-mac-randomization-analyzed/)). This system also does not require installing any apps on a phone. Tracking occurs anytime a WiFi chip makes a probe request (which is every minute or so). For this to work, it requires a one-time setup to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below).
+This system does not require being logged into a particular WiFi - it will track *any phone/device with WiFi enabled*! (Caveat: for iOS devices it will only track if Wi-Fi is associated with a network - any network, though - because of [MAC spoofing](http://blog.mojonetworks.com/ios8-mac-randomization-analyzed/) it uses for security). This system also does not require installing any apps on a phone. Tracking occurs anytime a WiFi chip makes a probe request (which is every minute or so). For this to work, it requires a one-time setup to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below).
 
 # How does it work?
 
