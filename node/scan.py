@@ -6,7 +6,6 @@
 
 import sys
 import json
-import datetime
 import socket
 import time
 import subprocess
@@ -27,7 +26,6 @@ import requests
 #     GPIO.setup(GPIO_PIN, GPIO.IN)
 # except:
 #     print("GPIO not available")
-SINGLE_WIFI = False
 
 def restart_wifi():
     os.system("/sbin/ifdown --force wlan0")
@@ -47,24 +45,20 @@ def num_wifi_cards():
 
 
 def process_scan(output,args):
-    # lastFiveMinutes = datetime.datetime.now() - datetime.timedelta(seconds=1)
-    # lastFiveMinutes = datetime.datetime(2016, 1, 6, 12, 6, 54, 684435) - datetime.timedelta(seconds=1)
     fingerprints = {}
     for line in output.splitlines():
         try:
-            # if 'Tp-LinkT' not in line:
-            #     continue
-            timestamp = datetime.datetime.strptime(
-                " ".join(
-                    line.split()[
-                        0:4])[
-                    :-3],
-                "%b %d, %Y %H:%M:%S.%f")
-            mac = line.split()[5]
-            mac2 = line.split()[6]
-            if mac == mac2 or 'ff:ff:ff:ff:ff:ff' not in mac2:
+            timestamp, mac, mac2, power_levels = line.split("\t")
+
+            if mac == mac2:
                 continue
-            rssi = line.split()[7].split(',')[0]
+
+            timestamp = float(timestamp)
+
+            rssi = power_levels.split(',')[0]
+            if len(rssi) == 0:
+                continue
+
             if mac not in fingerprints:
                 fingerprints[mac] = []
             fingerprints[mac].append(float(rssi))
@@ -112,11 +106,8 @@ def run_scan(timeOfScan,wlan):
     logger.debug(c)
     run_command(c)
     
-    if SINGLE_WIFI:
-        timeOfScan += 5
-
     data = []
-    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (timeOfScan,wlan)
+    c = "/usr/bin/timeout %ds /usr/bin/tshark -I -i %s -T fields -e frame.time_epoch -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % (timeOfScan,wlan)
     logger.debug("Running command: '%s'" % c)
     for line in run_command(c):
         data.append(line.decode('utf-8'))
@@ -136,7 +127,6 @@ def run_scan(timeOfScan,wlan):
 
 
 def main():
-    global SINGLE_WIFI
     # Check if SUDO
     # from
     # http://serverfault.com/questions/16767/check-admin-rights-inside-python-script
@@ -144,14 +134,32 @@ def main():
         print("you must run sudo!")
         return
 
+    # Check which interface
+    # Test if wlan0 / wlan1
+    default_wlan = "wlan1"
+    default_single_wifi = False
+    if num_wifi_cards() == 1:
+        default_single_wifi = True
+        default_wlan = "wlan0"
+
     # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--group", default="", help="group name")
+    parser.add_argument(
+        "-i",
+        "--interface",
+        default=default_wlan,
+        help="Interface to listen on - default %s" % default_wlan)
     parser.add_argument(
         "-t",
         "--time",
         default=10,
         help="scanning time in seconds (default 10)")
+    parser.add_argument(
+        "--single-wifi",
+        default=default_single_wifi,
+        action="store_true",
+        help="Engage single-wifi card mode?")
     parser.add_argument(
         "-s",
         "--server",
@@ -179,13 +187,6 @@ def main():
     logger.addHandler(fh)
     logger.addHandler(ch)
 
-    # Check which interface
-    # Test if wlan0 / wlan1
-    wlan = "wlan1"
-    SINGLE_WIFI = False
-    if num_wifi_cards() == 1:
-        SINGLE_WIFI = True
-        wlan = "wlan0"
     # data = []
     # c = "/usr/bin/timeout 10s /usr/bin/tshark -I -i %s -T fields -e frame.time -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal -e wlan.da_resolved" % (wlan)
     # logger.debug(c)
@@ -201,10 +202,15 @@ def main():
     logger.debug("Using server " + args.server)
     print("Using group " + args.group)
     logger.debug("Using group " + args.group)
+
+    time_to_scan = int(args.time)
+    if args.single_wifi:
+        time_to_scan += 5
+
     while True:
         try:
-            scan = run_scan(int(args.time),wlan)
-            if SINGLE_WIFI:
+            scan = run_scan(time_to_scan, args.interface)
+            if args.single_wifi:
                 logger.debug("Stopping monitor mode...")
                 restart_wifi()
                 logger.debug("...restarted WiFi in managed mode")
