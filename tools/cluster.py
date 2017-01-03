@@ -338,10 +338,14 @@ if __name__ == '__main__':
     if not os.path.exists(args.config):
         pis = []
         while True:
-            pi = input('Enter Pi address (enter if no more): ')
+            pi = input('Enter Pi address (e.g. pi@192.168.1.2. Enter blank if no more): ')
             if len(pi) == 0:
                 break
-            pis.append(pi.strip())
+            wlan = input('Which wlan to use (default: wlan1)?: ')
+            if len(wlan) == 0:
+                wlan = "wlan1"
+            piname = input('Enter Pi name (for you to remember): ')
+            pis.append({"address":pi.strip(),"name":piname.strip(),"wlan":wlan.strip()})
         if len(pis) == 0:
             print("Must include at least one computer!")
             sys.exit(-1)
@@ -353,6 +357,15 @@ if __name__ == '__main__':
         if 'http' not in config['lfserver']:
             config['lfserver'] = "http://" + config['lfserver']
         config['group'] = input('Enter a group: ')
+        if len(config['group']) == 0:
+            config['group'] = 'default'
+        config['scantime'] = input('Enter a scanning time (default 10 seconds): ')
+        if len(config['scantime']) == 0:
+            config['scantime'] = 10
+        try:
+            config['scantime'] = int(config['scantime'])
+        except:
+            config['scantime'] = 10
 
         with open(args.config, 'w') as f:
             f.write(json.dumps(config, indent=2))
