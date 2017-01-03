@@ -28,7 +28,8 @@ class CommandThread (threading.Thread):
         self.first = first
         self.config = config
         self.command = command
-        self.logger = logging.getLogger(self.config['address'])
+        self.name = self.config['notes'] + "(" + self.config['address'] + ")"
+        self.logger = logging.getLogger(self.name)
         self.logger.setLevel(logging.DEBUG)
         fh = logging.FileHandler('cluster.log')
         ch = logging.StreamHandler()
@@ -74,7 +75,7 @@ class CommandThread (threading.Thread):
                 print_help()
 
     def isRunning(self):
-        self.logger.debug("Testing if isRunning %(address)s" % self.config)
+        self.logger.debug("Testing if isRunning")
         c = """ssh -o ConnectTimeout=10 %(address)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip(
         )
         r, code = run_command(
@@ -103,10 +104,14 @@ class CommandThread (threading.Thread):
         return True
 
     def start_pi(self):
-        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo nohup python3 scan.py -g %(group)s -s %(lfserver)s < /dev/null > std.out 2> std.err &"'
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo nohup python3 scan.py --interface %(wlan)s --time %(scantime)d --group %(group)s --server %(lfserver)s < /dev/null > std.out 2> std.err &"'
         r, code = run_command(
             c % {'address': self.config['address'],
-                 'group': self.config['group'], 'lfserver': self.config['lfserver']})
+                 'group': self.config['group'], 
+                 'lfserver': self.config['lfserver'],
+                 'wlan': self.config['wlan'],
+                 'scantime': self.config['scantime']
+                 })
         self.logger.debug(r)
         self.logger.debug(code)
         if code == 255:
@@ -269,7 +274,9 @@ def main(args, config):
 
     threads = []
     for pi in config['pis']:
-        config['address'] = pi
+        config['address'] = pi['address']
+        config['wlan'] = pi['wlan']
+        config['notes'] = pi['notes']
         threads.append(
             CommandThread(config.copy(), command, args.debug, len(threads) == 0))
 
@@ -344,8 +351,8 @@ if __name__ == '__main__':
             wlan = input('Which wlan to use (default: wlan1)?: ')
             if len(wlan) == 0:
                 wlan = "wlan1"
-            piname = input('Enter Pi name (for you to remember): ')
-            pis.append({"address":pi.strip(),"name":piname.strip(),"wlan":wlan.strip()})
+            notes = input('Enter Pi notes (for you to remember): ')
+            pis.append({"address":pi.strip(),"notes":notes.strip(),"wlan":wlan.strip()})
         if len(pis) == 0:
             print("Must include at least one computer!")
             sys.exit(-1)
