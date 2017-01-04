@@ -238,7 +238,7 @@ def main(args, config):
         response = getURL(config['lfserver'] + "/switch",
                           {'group': config['group'],
                            'user': config['user'],
-                           'location': config['location']})
+                           'loc': config['location']})
         return
     elif command == "list":
         print("scanning all ips...please wait")
