@@ -349,10 +349,10 @@ if __name__ == '__main__':
             pi = input('Enter Pi address (e.g. pi@192.168.1.2. Enter blank if no more): ')
             if len(pi) == 0:
                 break
+            notes = input('Enter Pi notes (for you to remember): ')
             wlan = input('Which wlan to use (default: wlan1)?: ')
             if len(wlan) == 0:
                 wlan = "wlan1"
-            notes = input('Enter Pi notes (for you to remember): ')
             pis.append({"address":pi.strip(),"notes":notes.strip(),"wlan":wlan.strip()})
         if len(pis) == 0:
             print("Must include at least one computer!")
