@@ -211,12 +211,6 @@ func parseFingerprints() {
 func sendFingerprints(m map[string]map[string]map[string]int) {
 	for group := range m {
 		for user := range m[group] {
-
-			// Require a minimum of routers to participate
-			if len(m[group][user]) < MinimumNumberOfRouters {
-				continue
-			}
-
 			// Define route and whether learning / tracking
 			route := "/track"
 			location := "unknown"
@@ -232,6 +226,12 @@ func sendFingerprints(m map[string]map[string]map[string]int) {
 				route = "/learn"
 			}
 
+			// Require a minimum of routers to track
+			if MinimumNumberOfRouters > len(m[group][user]) && route == "/track" {
+				log.Printf("Not tracking %s in group %s because MinimumNumberOfRouters (%d) > num of routers in fingerprint (%d)", user, group, MinimumNumberOfRouters, len(m[group][user]))
+				continue
+			}
+
 			data := Fingerprint{
 				Username: strings.Replace(user, ":", "", -1),
 				Group:    group,
@@ -240,16 +240,18 @@ func sendFingerprints(m map[string]map[string]map[string]int) {
 
 			fingerprint := make([]Router, len(m[group][user]))
 			num := 0
-			hasOneGreaterThanMinRSSI := false
+			maxRSSI := 0
 			for mac := range m[group][user] {
 				fingerprint[num].Mac = mac
 				fingerprint[num].Rssi = m[group][user][mac]
-				if fingerprint[num].Rssi > MinRSSI {
-					hasOneGreaterThanMinRSSI = true
+				if fingerprint[num].Rssi > maxRSSI {
+					maxRSSI = fingerprint[num].Rssi
 				}
 				num++
 			}
-			if !hasOneGreaterThanMinRSSI {
+			// Require a maximum RSSI of fingerprint to above minimum RSSI threshold to track
+			if MinRSSI > maxRSSI && route == "/track" {
+				log.Printf("Not tracking %s in group %s because MinRSSI (%d) > max RSSI of fingerprint (%d)", user, group, MinRSSI, maxRSSI)
 				continue
 			}
 			data.WifiFingerprint = fingerprint
