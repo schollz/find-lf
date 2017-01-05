@@ -210,11 +210,9 @@ def main():
                 logger.debug(
                     "Sent to server with status code: " + str(r.status_code))
             time.sleep(args.time)  # Wait before getting next window
-        except:
-            e = sys.exc_info()[0]
-            logger.error(e)
-            logger.debug("Sleeping for 30 seconds")
-            time.sleep(30)
+        except Exception:
+            logger.error("Fatal error in main loop", exc_info=True)
+            time.sleep(args.time)
 
 
 def exit_handler():

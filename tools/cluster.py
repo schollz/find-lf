@@ -76,7 +76,7 @@ class CommandThread (threading.Thread):
 
     def isRunning(self):
         self.logger.debug("Testing if isRunning")
-        c = """ssh -o ConnectTimeout=10 %(address)s "ps aux | grep 'scan.py\|python3' | grep -v 'grep\|vim'" """.strip(
+        c = """ssh -o ConnectTimeout=10 %(address)s "ps aux | grep 'scan.py\|python3\|tshark' | grep -v 'grep\|vim'" """.strip(
         )
         r, code = run_command(
             c % {'address': self.config['address']})
@@ -98,6 +98,11 @@ class CommandThread (threading.Thread):
         if code == 255:
             self.logger.info("unable to connect")
             return False
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo pkill -9 tshark"'
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
         stillRunning, foo2 = self.isRunning()
         if not stillRunning:
             self.logger.info("killed")
@@ -214,6 +219,8 @@ python3 cluster.py COMMAND
         stops and starts all Pis in the cluster
     initialize:
         download the latest version of scan.py and update packages
+    update:
+        download the latest version of scan.py
     track -g GROUP:
         communicate with find-lf server to tell it to track
         for group GROUP
