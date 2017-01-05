@@ -57,7 +57,7 @@ def process_scan(time_window):
             if mac == mac2 or float(timestamp) < timestamp_threshold or len(mac) == 0:
                 continue
             
-            relevant_lines++
+            relevant_lines += 1
             rssi = power_levels.split(',')[0]
             if len(rssi) == 0:
                 continue
