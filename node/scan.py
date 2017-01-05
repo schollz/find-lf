@@ -49,13 +49,15 @@ def process_scan(time_window):
 
     timestamp_threshold = float(time.time()) - float(time_window)
     fingerprints = {}
+    relevant_lines = 0
     for line in output.splitlines():
         try:
             timestamp, mac, mac2, power_levels = line.split("\t")
 
             if mac == mac2 or float(timestamp) < timestamp_threshold or len(mac) == 0:
                 continue
-
+            
+            relevant_lines++
             rssi = power_levels.split(',')[0]
             if len(rssi) == 0:
                 continue
@@ -76,8 +78,8 @@ def process_scan(time_window):
         fingerprints2.append(
             {"mac": mac, "rssi": int(statistics.median(fingerprints[mac]))})
 
-    logger.debug("Processed %d lines, found %d fingerprints" %
-                 (len(output.splitlines()), len(fingerprints2)))
+    logger.debug("Processed %d lines, found %d fingerprints in %d relevant lines" %
+                 (len(output.splitlines()), len(fingerprints2),relevant_lines))
 
     payload = {
         "node": socket.gethostname(),
