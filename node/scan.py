@@ -209,10 +209,10 @@ def main():
                     json=payload)
                 logger.debug(
                     "Sent to server with status code: " + str(r.status_code))
-            time.sleep(args.time)  # Wait before getting next window
+            time.sleep(float(args.time))  # Wait before getting next window
         except Exception:
             logger.error("Fatal error in main loop", exc_info=True)
-            time.sleep(args.time)
+            time.sleep(float(args.time))
 
 
 def exit_handler():
