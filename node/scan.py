@@ -19,7 +19,6 @@ logger = logging.getLogger('scan.py')
 
 import requests
 
-
 def restart_wifi():
     os.system("/sbin/ifdown --force wlan0")
     os.system("/sbin/ifup --force wlan0")
@@ -41,11 +40,20 @@ def num_wifi_cards():
 
 
 def process_scan(time_window):
+    logger.debug("Reading files...")
     output = ""
+    maxFileNumber = -1
+    fileNameToRead = ""
     for filename in glob.glob("/tmp/tshark-temp*"):
-        cmd = subprocess.Popen(("tshark -r "+filename+" -T fields -e frame.time_epoch -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal").split(
-        ), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output += cmd.stdout.read().decode('utf-8')
+        fileNumber = int(filename.split("_")[1])
+        if fileNumber > maxFileNumber:
+            maxFileNumber = fileNumber
+            fileNameToRead = filename
+
+    logger.debug("Reading from %s" % fileNameToRead)
+    cmd = subprocess.Popen(("tshark -r "+fileNameToRead+" -T fields -e frame.time_epoch -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal").split(
+    ), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output += cmd.stdout.read().decode('utf-8')
 
     timestamp_threshold = float(time.time()) - float(time_window)
     fingerprints = {}
@@ -57,7 +65,7 @@ def process_scan(time_window):
             if mac == mac2 or float(timestamp) < timestamp_threshold or len(mac) == 0:
                 continue
             
-            relevant_lines += 1
+            relevant_lines+=1
             rssi = power_levels.split(',')[0]
             if len(rssi) == 0:
                 continue
@@ -67,6 +75,7 @@ def process_scan(time_window):
             fingerprints[mac].append(float(rssi))
         except:
             pass
+    logger.debug("..done")
 
     # Compute medians
     fingerprints2 = []
@@ -112,7 +121,7 @@ def start_scan(wlan):
         # Remove previous files
         for filename in glob.glob("/tmp/tshark-temp*"):
             os.remove(filename)
-        subprocess.Popen(("/usr/bin/tshark -I -i " + wlan + " -b files:2 -b filesize:10000 -w /tmp/tshark-temp").split(),
+        subprocess.Popen(("/usr/bin/tshark -I -i " + wlan + " -b files:4 -b filesize:1000 -w /tmp/tshark-temp").split(),
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if tshark_is_running():
             logger.info("Starting scan")
