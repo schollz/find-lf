@@ -58,7 +58,7 @@ class CommandThread (threading.Thread):
         if self.command == "status":
             foo, self.output = self.isRunning()
             self.logger.info(self.output)
-        elif self.command == "kill":
+        elif self.command == "kill" or self.command == "stop":
             self.kill_pi()
         elif self.command == "start":
             self.start_pi()
@@ -109,6 +109,10 @@ class CommandThread (threading.Thread):
         return True
 
     def start_pi(self):
+        alreadyRunning, foo = self.isRunning()
+        if alreadyRunning:
+            self.logger.info("already running")
+            return
         c = 'ssh -o ConnectTimeout=10 %(address)s "sudo nohup python3 scan.py --interface %(wlan)s --time %(scantime)d --group %(group)s --server %(lfserver)s < /dev/null > std.out 2> std.err &"'
         r, code = run_command(
             c % {'address': self.config['address'],
