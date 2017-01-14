@@ -54,6 +54,7 @@ class CommandThread (threading.Thread):
         self.logger.addHandler(ch)
         self.logger.debug("Started command thread")
         self.output = ""
+        self.logger.info("attempting to connect")
 
     def run(self):
         self.logger.debug(
@@ -65,7 +66,7 @@ class CommandThread (threading.Thread):
             self.kill_pi()
         elif self.command == "start":
             self.start_pi()
-        elif self.command == "update":
+        elif self.command == "update" or self.command == "download":
             self.update_scanpy() 
         elif self.command == "initialize":
             self.initialize()
@@ -159,6 +160,11 @@ class CommandThread (threading.Thread):
             self.logger.info("unable to connect")
             return False
         c = 'ssh -o ConnectTimeout=10 %(address)s "sudo pkill -9 tshark"'
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo pkill -9 dumpcap"'
         r, code = run_command(
             c % {'address': self.config['address']})
         self.logger.debug(r)
@@ -292,7 +298,7 @@ python3 cluster.py COMMAND
         stops and starts all Pis in the cluster
     initialize:
         download the latest version of scan.py and update packages
-    update:
+    update / download:
         download the latest version of scan.py
     host:
         start a WiFi access point on wlan1
