@@ -13,13 +13,15 @@ import urllib.parse as urlparse
 from urllib.parse import urlencode
 import logging
 import threading
+import string
+import random
+import time
 
 import requests
 
 # create logger with 'spam_application'
 logger = logging.getLogger('cluster.py')
 logger.setLevel(logging.DEBUG)
-
 
 class CommandThread (threading.Thread):
 
@@ -31,6 +33,7 @@ class CommandThread (threading.Thread):
         self.name = self.config['notes'] + "(" + self.config['address'] + ")"
         self.logger = logging.getLogger(self.name)
         self.logger.setLevel(logging.DEBUG)
+        self.hostapd = """interface=wlan1\nssid=PiNetwork\nhw_mode=g\nchannel=6\nauth_algs=1\nmacaddr_acl=0\nignore_broadcast_ssid=0\nwpa=2\nwpa_passphrase=%(password)s\nwpa_key_mgmt=WPA-PSK\nwpa_pairwise=TKIP\nrsn_pairwise=CCMP""" % {'password':''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))}
         fh = logging.FileHandler('cluster.log')
         ch = logging.StreamHandler()
         if debug:
@@ -68,11 +71,59 @@ class CommandThread (threading.Thread):
             self.initialize()
         elif self.command == "restart":
             self.restart_pi()
-        elif self.command == "stop":
-            self.kill_pi()
+        elif self.command == "host":
+            self.host_pi()
         else:
             if self.first:
                 print_help()
+
+    def host_pi(self):
+        hostingSuccess, foo = self.isRunning()
+        if hostingSuccess:
+            self.logger.info("already doing something")
+            return
+        c = """ssh -o ConnectTimeout=10 %(address)s "echo '%(hostapd)s' | sudo tee /etc/hostapd/hostapd.conf" """.strip()
+        r, code = run_command(
+            c % {'address': self.config['address'],'hostapd':self.hostapd})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        c = """ssh -o ConnectTimeout=10 %(address)s "sudo kill \`cat /run/wpa_supplicant.wlan1.pid\`" """.strip()
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        c = """ssh -o ConnectTimeout=10 %(address)s "sudo hostapd /etc/hostapd/hostapd.conf -P /run/hostapd.pid -B" """.strip()
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        hostingSuccess, foo = self.isRunning()
+        if not hostingSuccess:
+            self.logger.info("not able to host")
+            return
+        c = """ssh -o ConnectTimeout=10 %(address)s "sudo ifconfig" """.strip()
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        address = ""
+        for line in r.splitlines():
+            items = line.split()
+            if len(items) < 5:
+                continue
+            if items[0] != "wlan1":
+                continue
+            if ':' in items[4]:
+                address = items[4]
+                break
+            macAds = []
+            for macAd in items[4].split('-'):
+                macAds.append(macAd)
+                if len(macAds) == 6:
+                    break
+            address = ':'.join(macAds).lower()
+            break
+        self.logger.info("hosting, mac address = %s" % address)
 
     def isRunning(self):
         self.logger.debug("Testing if isRunning")
@@ -86,8 +137,17 @@ class CommandThread (threading.Thread):
             return False, "unable to connect to " + self.config['address']
         if len(r.strip()) != 0:
             return True, "%s is scanning" % self.config['address']
+
+        c = """ssh -o ConnectTimeout=10 %(address)s "ps aux | grep 'hostapd' | grep -v 'grep\|vim'" """.strip(
+        )
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        if len(r.strip()) != 0:
+            return True, "%s is access point" % self.config['address']
         else:
-            return False, "%s is not scanning" % self.config['address']
+            return False, "%s is not scanning/hosting" % self.config['address']
 
     def kill_pi(self):
         c = 'ssh -o ConnectTimeout=10 %(address)s "sudo pkill -9 python3"'
@@ -103,10 +163,19 @@ class CommandThread (threading.Thread):
             c % {'address': self.config['address']})
         self.logger.debug(r)
         self.logger.debug(code)
+        c = """ssh -o ConnectTimeout=10 %(address)s "sudo kill \`cat /run/hostapd.pid\`" """.strip()
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        time.sleep(2)
         stillRunning, foo2 = self.isRunning()
         if not stillRunning:
             self.logger.info("killed")
-        return True
+            return True
+        else:
+            self.logger.info("could not kill")
+            return False
 
     def start_pi(self):
         alreadyRunning, foo = self.isRunning()
@@ -215,7 +284,7 @@ python3 cluster.py COMMAND
         list computers on the network
     status:
         get the current status of all Pis in the cluster
-    stop:
+    stop / kill:
         stops scanning in all Pis in the cluster
     start:
         starts scanning in all Pis in the cluster
@@ -225,6 +294,8 @@ python3 cluster.py COMMAND
         download the latest version of scan.py and update packages
     update:
         download the latest version of scan.py
+    host:
+        start a WiFi access point on wlan1
     track -g GROUP:
         communicate with find-lf server to tell it to track
         for group GROUP
