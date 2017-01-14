@@ -257,7 +257,7 @@ func sendFingerprints(m map[string]map[string]map[string]int) {
 			data.WifiFingerprint = fingerprint
 
 			b, _ := json.Marshal(data)
-			log.Println("Sending to " + route + ": " + string(b))
+			log.Println("Sending to " + ServerAddress + route + ": " + string(b))
 
 			payloadBytes, err := json.Marshal(data)
 			if err != nil {
