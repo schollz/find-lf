@@ -47,6 +47,14 @@ First make sure you have SSH installed and nmap.
 sudo apt-get install openssh-client openssh-server nmap
 ```
 
+Its useful to add your SSH key to each Pi, which you can do just using:
+
+```
+ssh-keygen                                               # do this once
+cat ~/.ssh/id_rsa.pub | ssh pi@1YOURADDRESS \
+  "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"     # do for every Pi
+```
+
 Then download `cluster.py` for accessing the cluster
 ```
 wget https://raw.githubusercontent.com/schollz/find-lf/master/tools/cluster.py
