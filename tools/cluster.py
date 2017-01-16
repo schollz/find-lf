@@ -74,9 +74,31 @@ class CommandThread (threading.Thread):
             self.restart_pi()
         elif self.command == "host":
             self.host_pi()
+        elif self.command == "reboot":
+            self.reboot_pi()
+        elif self.command == "shutdown":
+            self.shutdown_pi()
         else:
             if self.first:
                 print_help()
+
+    def shutdown_pi(self):
+        self.kill_pi()
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo shutdown now"'
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        self.logger.info("rebooting")
+
+    def reboot_pi(self):
+        self.kill_pi()
+        c = 'ssh -o ConnectTimeout=10 %(address)s "sudo reboot now"'
+        r, code = run_command(
+            c % {'address': self.config['address']})
+        self.logger.debug(r)
+        self.logger.debug(code)
+        self.logger.info("rebooting")
 
     def host_pi(self):
         hostingSuccess, foo = self.isRunning()
