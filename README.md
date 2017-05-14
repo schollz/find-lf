@@ -6,6 +6,8 @@ The system uses a network of Raspberry Pis which sniff the WiFi probe requests f
 
 This system does not require being logged into a particular WiFi - it will track *any phone/device with WiFi enabled*! (Caveat: for iOS devices it will only track if Wi-Fi is associated with a network - any network, though - because of [MAC spoofing](http://blog.mojonetworks.com/ios8-mac-randomization-analyzed/) it uses for security). This system also does not require installing any apps on a phone. Tracking occurs anytime a WiFi chip makes a probe request (which is every minute or so). For this to work, it requires a one-time setup to populate the system with known fingerprints of known locations before it can pinpoint locations (see #3 below).
 
+### Note: **It may be illegal** to monitor networks for MAC addresses, especially on networks that *you do not own*. Please check your country's laws (for US [Section 18 U.S. Code § 2511](https://www.law.cornell.edu/uscode/text/18/2511)) - [discussion](https://github.com/schollz/howmanypeoplearearound/issues/4).
+
 # How does it work?
 
 You can setup Raspberry Pis around a house in a way that they will see different signal strengths from various WiFi devices. Each WiFi-enabled device see requests from the various Raspberry Pis with different strengths (see colored bars in Figure below). These graphs are a *fingerprint* which can be used to uniquely classify the location.
