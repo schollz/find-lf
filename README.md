@@ -22,8 +22,19 @@ Once sent to the FIND server, the location can be directly determined. For more 
 
 # Requirements
 
-- Several Raspberry Pis, where each Raspberry pi has [a USB Wifi adapter that supports "monitor mode"](http://elinux.org/RPi_USB_Wi-Fi_Adapters), and it additionally has a second internet connection via ethernet or another adapter
-- A computer with Python3 and SSH installed
+You will need a monitor-mode enabled wifi USB adapter. There are a number of possible USB WiFi adapters that support monitor mode. Here's a list that are popular:
+
+- [USB Rt3070 $14](http://amzn.to/2yzHbxz)
+- [Panda PAU5 $14](http://amzn.to/2kzgiDE)
+- [Panda PAU6 $15](http://amzn.to/2xsEHRa)
+- [Panda PAU9 $36](http://amzn.to/2z8VWnM)
+- [Alfa AWUSO36NH $33](http://amzn.to/2xry4P8)
+- [Alfa AWUS036NHA $40](http://amzn.to/2yzL8lJ)
+- [Alfa AWUS036NEH $40](http://amzn.to/2xsUfVi)
+- [Sabrent NT-WGHU $15 (b/g) only](http://amzn.to/2xsZLaf)
+
+Namely you want to find a USB adapter with one of the following chipsets: Atheros AR9271, Ralink RT3070, Ralink RT3572, or Ralink RT5572.
+
 
 # Setup
 
