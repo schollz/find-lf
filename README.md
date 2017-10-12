@@ -22,6 +22,11 @@ Once sent to the FIND server, the location can be directly determined. For more 
 
 # Requirements
 
+You will need a Raspberry Pi. Ones with built-in Wifi work best:
+
+- [Raspberry Pi Zero W](http://amzn.to/2gfUxHw)
+- [Raspberry Pi 3](http://amzn.to/2kIVwBo)
+
 You will need a monitor-mode enabled wifi USB adapter. There are a number of possible USB WiFi adapters that support monitor mode. Here's a list that are popular:
 
 - [USB Rt3070 $14](http://amzn.to/2yzHbxz)
