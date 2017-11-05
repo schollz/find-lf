@@ -11,6 +11,7 @@ The server is also used as a switch to tell it what to do with the fingerprints.
 Install the server just using
 
 ```
+go get github.com/gin-gonic/gin
 go build
 ```
 
